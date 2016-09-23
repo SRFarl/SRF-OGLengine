@@ -2,28 +2,16 @@
 #define _ASSETBOX_H_
 #include "Headers.h"
 #include "OBJLoader_SRF.h"
-#include "EntityComponents.h"
-
-struct Asset
-{
-	std::string assetName;
-	GLuint m_glVertBuffer; //vertex VBO
-	GLuint m_glNormBuffer; //normal VBO
-	GLuint m_glUVBuffer; //uv VBO
-	GLuint m_glIndexBuffer;
-	GLuint m_glVertArray; //VAO
-	Material m_glMaterial;
-	GLsizei m_unVertexCount;
-};
 
 class AssetBox
 {
 public:
 	AssetBox();
 
-	void LoadAsset(std::string assetName, std::string meshName)
+	void LoadAsset(std::string _assetName, std::string meshName)
 	{
 		Asset temp;
+		temp.assetName = _assetName;
 
 		std::vector<glm::vec4> modelVertices;
 		std::vector<glm::vec2> modelUVs;
@@ -98,6 +86,8 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+		assetList.push_back(temp);
 	}
 
 	void RemoveAsset(const std::string _assetName)

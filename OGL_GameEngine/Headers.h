@@ -24,4 +24,41 @@
 #define PI 3.14159265359
 #define HALF_PI 1.57079632679
 
+struct Material {
+	GLuint diffuse;
+	GLuint specular;
+	GLfloat shininess;
+};
+
+struct Asset
+{
+	std::string assetName;
+	GLuint m_glVertBuffer; //vertex VBO
+	GLuint m_glNormBuffer; //normal VBO
+	GLuint m_glUVBuffer; //uv VBO
+	GLuint m_glIndexBuffer;
+	GLuint m_glVertArray; //VAO
+	Material m_glMaterial;
+	GLsizei m_unVertexCount;
+};
+
+struct PointLight {
+	glm::vec3 position;
+
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+
+	float constant;
+	float linear;
+	float quadratic;
+};
+
+struct DirectionalLight {
+	glm::vec3 direction;
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+};
+
 #endif 
