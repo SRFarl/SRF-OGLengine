@@ -26,7 +26,11 @@
 
 struct Material {
 	GLuint diffuse;
+	GLfloat diffuseSet;
 	GLuint specular;
+	GLfloat specularSet;
+	GLuint emission;
+	GLfloat emissionSet;
 	GLfloat shininess;
 };
 

@@ -15,27 +15,21 @@ public:
 
 	~RenderComponent()
 	{
-		if (m_glVertBuffer)
+		if (m_rcAsset->m_glVertBuffer)
 		{
-			glDeleteBuffers(1, &m_glIndexBuffer);
-			glDeleteVertexArrays(1, &m_glVertArray);
-			glDeleteBuffers(1, &m_glVertBuffer);
-			m_glIndexBuffer = 0;
-			m_glVertArray = 0;
-			m_glVertBuffer = 0;
+			glDeleteBuffers(1, &m_rcAsset->m_glIndexBuffer);
+			glDeleteVertexArrays(1, &m_rcAsset->m_glVertArray);
+			glDeleteBuffers(1, &m_rcAsset->m_glVertBuffer);
+			m_rcAsset->m_glIndexBuffer = 0;
+			m_rcAsset->m_glVertArray = 0;
+			m_rcAsset->m_glVertBuffer = 0;
 		}
 	}
 
 	GLuint m_program;
 	GLint m_shaderModelMatLocation, m_shaderViewMatLocation, m_shaderProjMatLocation;
 	glm::mat4* m_viewMatrix, * m_projMatrix;
-	GLuint m_glVertBuffer; //vertex VBO
-	GLuint m_glNormBuffer; //normal VBO
-	GLuint m_glUVBuffer; //uv VBO
-	GLuint m_glIndexBuffer;
-	GLuint m_glVertArray; //VAO
-	Material m_glMaterial;
-	GLsizei m_unVertexCount;
+	Asset* m_rcAsset;
 };
 
 class MovableComponent

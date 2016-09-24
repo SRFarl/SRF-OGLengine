@@ -62,18 +62,20 @@ public:
 			glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.diffuse"), 1, glm::value_ptr(m_dlList[0]->diffuse));
 			glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.specular"), 1, glm::value_ptr(m_dlList[0]->specular));
 
-			glUniform1f(glGetUniformLocation((*it)->render->m_program, "material.shininess"), (*it)->render->m_glMaterial.shininess);
+			glUniform1f(glGetUniformLocation((*it)->render->m_program, "material.diffuseSet"), (*it)->render->m_rcAsset->m_glMaterial.diffuseSet);
+			glUniform1f(glGetUniformLocation((*it)->render->m_program, "material.specularSet"), (*it)->render->m_rcAsset->m_glMaterial.specularSet);
+			glUniform1f(glGetUniformLocation((*it)->render->m_program, "material.shininess"), (*it)->render->m_rcAsset->m_glMaterial.shininess);
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, (*it)->render->m_glMaterial.diffuse);
+			glBindTexture(GL_TEXTURE_2D, (*it)->render->m_rcAsset->m_glMaterial.diffuse);
 			glUniform1i(glGetUniformLocation((*it)->render->m_program, "material.diffuse"), 0);
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, (*it)->render->m_glMaterial.specular);
+			glBindTexture(GL_TEXTURE_2D, (*it)->render->m_rcAsset->m_glMaterial.specular);
 			glUniform1i(glGetUniformLocation((*it)->render->m_program, "material.specular"), 1);
 
-			glBindVertexArray((*it)->render->m_glVertArray);
+			glBindVertexArray((*it)->render->m_rcAsset->m_glVertArray);
 
-			glDrawArrays(GL_TRIANGLES, 0, (*it)->render->m_unVertexCount);
+			glDrawArrays(GL_TRIANGLES, 0, (*it)->render->m_rcAsset->m_unVertexCount);
 
 			glBindVertexArray(0);
 

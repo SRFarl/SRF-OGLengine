@@ -6,9 +6,9 @@
 class AssetBox
 {
 public:
-	AssetBox();
+	AssetBox(){};
 
-	void LoadAsset(std::string _assetName, std::string meshName)
+	void LoadAsset(std::string _assetName, std::string meshName, std::string diffuseName, std::string specularName, float _shininess)
 	{
 		Asset temp;
 		temp.assetName = _assetName;
@@ -59,31 +59,45 @@ public:
 		int width, height;
 		unsigned char* image;
 
+		temp.m_glMaterial.shininess = _shininess;
 
-		temp.m_glMaterial.shininess = 32.0f;
 		//diffuse
-		glGenTextures(1, &temp.m_glMaterial.diffuse);
-		image = SOIL_load_image("Models/c_text.png", &width, &height, 0, SOIL_LOAD_RGB);
-		glBindTexture(GL_TEXTURE_2D, temp.m_glMaterial.diffuse);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		SOIL_free_image_data(image);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		if (!diffuseName.empty())
+		{
+			glGenTextures(1, &temp.m_glMaterial.diffuse);
+			image = SOIL_load_image(diffuseName.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
+			glBindTexture(GL_TEXTURE_2D, temp.m_glMaterial.diffuse);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+			glGenerateMipmap(GL_TEXTURE_2D);
+			SOIL_free_image_data(image);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+			temp.m_glMaterial.diffuseSet = 1.0f;
+		}
+		else {
+			temp.m_glMaterial.diffuseSet = 0.0f; 
+		}
 
 		//specular
-		glGenTextures(1, &temp.m_glMaterial.specular);
-		image = SOIL_load_image("Models/c_text_spec.png", &width, &height, 0, SOIL_LOAD_RGB);
-		glBindTexture(GL_TEXTURE_2D, temp.m_glMaterial.specular);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		SOIL_free_image_data(image);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		if (!specularName.empty())
+		{
+			glGenTextures(1, &temp.m_glMaterial.specular);
+			image = SOIL_load_image(specularName.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
+			glBindTexture(GL_TEXTURE_2D, temp.m_glMaterial.specular);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+			glGenerateMipmap(GL_TEXTURE_2D);
+			SOIL_free_image_data(image);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+			temp.m_glMaterial.specularSet = 1.0f;
+		}
+		else {
+			temp.m_glMaterial.specularSet = 0.0f;
+		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -104,12 +118,23 @@ public:
 		}
 	}
 
+	Asset* GetAsset(std::string _assetName)
+	{
+		for (std::vector<Asset>::iterator it = assetList.begin(); it != assetList.end();)
+		{
+			if (it->assetName == _assetName)
+				return &(*it);
+
+			it++;
+		}
+	}
+
 	void BindAsset(const std::string _assetName)
 	{
 		for (std::vector<Asset>::iterator it = assetList.begin(); it != assetList.end();)
 		{
 			if (it->assetName == _assetName)
-				glBindVertexArray(*it->vAO);
+				glBindVertexArray(it->m_glVertArray);
 
 			it++;
 		}
