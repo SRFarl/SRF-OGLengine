@@ -15,6 +15,9 @@
 #include <string>
 #include <SOIL.h>
 #include <list>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #define WINPOSX 100
 #define WINPOSY 100
