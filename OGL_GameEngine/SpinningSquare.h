@@ -1,13 +1,14 @@
 #include "EntityEngine.h"
 #include "GameObject.h"
+#include "Model.h"
 
 class SpinningSquare : public GameObject
 {
 public:
-	SpinningSquare(const std::string gameModelName, Asset* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(gameModelName, initPos, initRot, false), m_gameEE(gameEE)
+	SpinningSquare(const std::string gameModelName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(gameModelName, initPos, initRot, false), m_gameEE(gameEE)
 	{
 		m_rComp = new RenderComponent(_program, viewMat, projMat);
-		m_rComp->m_rcAsset = modelAsset;
+		m_rComp->m_rcModel = modelAsset;
 
 		m_renderNode = new RenderNode(&m_modelMatrix, m_rComp);
 		gameEE->AddRenderNode(m_renderNode);

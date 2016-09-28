@@ -42,44 +42,35 @@ public:
 	{
 		for (std::vector<RenderNode*>::iterator it = m_rnList.begin(); it != m_rnList.end();)
 		{
+			for (std::vector<Mesh>::iterator it2 = (*it)->render->m_rcModel->m_meshes.begin(); it2 != (*it)->render->m_rcModel->m_meshes.end();)
+			{
+				glUseProgram((*it)->render->m_program);
 
-			glUseProgram((*it)->render->m_program);
+				glUniformMatrix4fv((*it)->render->m_shaderModelMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->position));
+				glUniformMatrix4fv((*it)->render->m_shaderViewMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->render->m_viewMatrix));
+				glUniformMatrix4fv((*it)->render->m_shaderProjMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->render->m_projMatrix));
 
-			glUniformMatrix4fv((*it)->render->m_shaderModelMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->position));
-			glUniformMatrix4fv((*it)->render->m_shaderViewMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->render->m_viewMatrix));
-			glUniformMatrix4fv((*it)->render->m_shaderProjMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->render->m_projMatrix));
+				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.position"), 1, glm::value_ptr(m_plList[0]->position));
+				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.ambient"), 1, glm::value_ptr(m_plList[0]->ambient));
+				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.diffuse"), 1, glm::value_ptr(m_plList[0]->diffuse));
+				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.specular"), 1, glm::value_ptr(m_plList[0]->specular));
+				glUniform1f(glGetUniformLocation((*it)->render->m_program, "light.constant"), m_plList[0]->constant);
+				glUniform1f(glGetUniformLocation((*it)->render->m_program, "light.linear"), m_plList[0]->linear);
+				glUniform1f(glGetUniformLocation((*it)->render->m_program, "light.quadratic"), m_plList[0]->quadratic);
 
-			glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.position"), 1, glm::value_ptr(m_plList[0]->position));
-			glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.ambient"), 1, glm::value_ptr(m_plList[0]->ambient));
-			glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.diffuse"), 1, glm::value_ptr(m_plList[0]->diffuse));
-			glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.specular"), 1, glm::value_ptr(m_plList[0]->specular));
-			glUniform1f(glGetUniformLocation((*it)->render->m_program, "light.constant"), m_plList[0]->constant);
-			glUniform1f(glGetUniformLocation((*it)->render->m_program, "light.linear"), m_plList[0]->linear);
-			glUniform1f(glGetUniformLocation((*it)->render->m_program, "light.quadratic"), m_plList[0]->quadratic);
+				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.direction"), 1, glm::value_ptr(m_dlList[0]->direction));
+				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.ambient"), 1, glm::value_ptr(m_dlList[0]->ambient));
+				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.diffuse"), 1, glm::value_ptr(m_dlList[0]->diffuse));
+				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.specular"), 1, glm::value_ptr(m_dlList[0]->specular));
 
-			glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.direction"), 1, glm::value_ptr(m_dlList[0]->direction));
-			glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.ambient"), 1, glm::value_ptr(m_dlList[0]->ambient));
-			glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.diffuse"), 1, glm::value_ptr(m_dlList[0]->diffuse));
-			glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.specular"), 1, glm::value_ptr(m_dlList[0]->specular));
+				glUniform1f(glGetUniformLocation((*it)->render->m_program, "material.shininess"), 16.0f);
 
-			glUniform1f(glGetUniformLocation((*it)->render->m_program, "material.diffuseSet"), (*it)->render->m_rcAsset->m_glMaterial.diffuseSet);
-			glUniform1f(glGetUniformLocation((*it)->render->m_program, "material.specularSet"), (*it)->render->m_rcAsset->m_glMaterial.specularSet);
-			glUniform1f(glGetUniformLocation((*it)->render->m_program, "material.shininess"), (*it)->render->m_rcAsset->m_glMaterial.shininess);
+				(*it2).Draw((*it)->render->m_program);
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, (*it)->render->m_rcAsset->m_glMaterial.diffuse);
-			glUniform1i(glGetUniformLocation((*it)->render->m_program, "material.diffuse"), 0);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, (*it)->render->m_rcAsset->m_glMaterial.specular);
-			glUniform1i(glGetUniformLocation((*it)->render->m_program, "material.specular"), 1);
+				glUseProgram(0);
 
-			glBindVertexArray((*it)->render->m_rcAsset->m_glVertArray);
-
-			glDrawArrays(GL_TRIANGLES, 0, (*it)->render->m_rcAsset->m_unVertexCount);
-
-			glBindVertexArray(0);
-
-			glUseProgram(0);
+				it2++;
+			}
 
 			it++;
 		}

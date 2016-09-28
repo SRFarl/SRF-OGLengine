@@ -204,13 +204,10 @@ void CmainApp::BInitGame()
 	m_fpsCam = new FPSCamera(m_fCameraSens);
 
 	//load assets
-	m_assetBox->LoadAsset("numberedcube", "Models/c_mesh.obj", "Models/c_text.png", "Models/c_text_spec.png", 32.0f);
-	
-	m_testSpinningSquare = new SpinningSquare("test", m_assetBox->GetAsset("numberedcube"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
-	m_testSpinningSquare2 = new SpinningSquare("test", m_assetBox->GetAsset("numberedcube"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, -4.0f, 0), glm::vec3(0, 0, 0));
-	m_gOList.push_back(m_testSpinningSquare);
-	m_gOList.push_back(m_testSpinningSquare2);
+	m_assetBox->LoadAsset("nanosuit", "Models/nanosuit.obj");
 
+	m_testSpinningSquare = new SpinningSquare("test", m_assetBox->GetAsset("nanosuit"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+	m_gOList.push_back(m_testSpinningSquare);
 }
 
 void CmainApp::DebugCalls()

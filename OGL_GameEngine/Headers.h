@@ -27,27 +27,7 @@
 #define PI 3.14159265359
 #define HALF_PI 1.57079632679
 
-struct Material {
-	GLuint diffuse;
-	GLfloat diffuseSet;
-	GLuint specular;
-	GLfloat specularSet;
-	GLuint emission;
-	GLfloat emissionSet;
-	GLfloat shininess;
-};
 
-struct Asset
-{
-	std::string assetName;
-	GLuint m_glVertBuffer; //vertex VBO
-	GLuint m_glNormBuffer; //normal VBO
-	GLuint m_glUVBuffer; //uv VBO
-	GLuint m_glIndexBuffer;
-	GLuint m_glVertArray; //VAO
-	Material m_glMaterial;
-	GLsizei m_unVertexCount;
-};
 
 struct PointLight {
 	glm::vec3 position;
@@ -67,5 +47,33 @@ struct DirectionalLight {
 	glm::vec3 diffuse;
 	glm::vec3 specular;
 };
+
+/* THIS ERROR CHECKER SAVED MY SANITY 
+void _CheckGLError(const char* file, int line);
+
+#define CheckGLError() _CheckGLError(__FILE__, __LINE__)
+
+void _CheckGLError(const char* file, int line)
+{
+	GLenum err(glGetError());
+
+	while (err != GL_NO_ERROR)
+	{
+		std::string error;
+		switch (err)
+		{
+		case GL_INVALID_OPERATION:  error = "INVALID_OPERATION";      break;
+		case GL_INVALID_ENUM:       error = "INVALID_ENUM";           break;
+		case GL_INVALID_VALUE:      error = "INVALID_VALUE";          break;
+		case GL_OUT_OF_MEMORY:      error = "OUT_OF_MEMORY";          break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:  error = "INVALID_FRAMEBUFFER_OPERATION";  break;
+		}
+		std::cout << "GL_" << error.c_str() << " - " << file << ":" << line << std::endl;
+		err = glGetError();
+	}
+
+	return;
+}
+*/
 
 #endif 
