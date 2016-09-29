@@ -17,6 +17,7 @@ public:
 		m_movableNode = new MovableNode(&m_position, m_mComp);
 		gameEE->AddMovableNode(m_movableNode);
 
+		m_rotAngles.y += glm::radians(0.1f);
 	}
 
 	~SpinningSquare()

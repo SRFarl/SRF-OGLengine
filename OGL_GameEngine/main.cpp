@@ -2,10 +2,10 @@
 #include "Shader.h"
 #include "SDLInputHandler.h"
 #include "SDLFrameRateController.h"
-#include "EntityEngine.h"
 #include "SpinningSquare.h"
 #include "FPSCamera.h"
 #include "AssetBox.h"
+#include "EntityEngine.h"
 
 class CmainApp
 {
@@ -46,6 +46,7 @@ private: //GL
 private: //Game objects
 	FPSCamera* m_fpsCam;
 	PointLight* m_mainLight;
+	glm::mat4 m_lightmat;
 	DirectionalLight* m_mainDLight;
 
 	std::vector<GameObject*> m_gOList;
@@ -196,15 +197,22 @@ void CmainApp::BInitGame()
 
 	m_mainDLight = new DirectionalLight;
 	m_mainDLight->direction = glm::vec3(-1.0f, -5.0f, 1.0f);
-	m_mainDLight->diffuse = glm::vec3(0.6f, 0.6f, 0.6f);
+	m_mainDLight->diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
 	m_mainDLight->specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	m_mainDLight->ambient = glm::vec3(0.2f, 0.2f, 0.2f);
 	m_entityEngine->AddRenderDirectionalLight(m_mainDLight);
 
 	m_fpsCam = new FPSCamera(m_fCameraSens);
+	m_entityEngine->AddCamera(m_fpsCam);
 
 	//load assets
-	m_assetBox->LoadAsset("nanosuit", "Models/nanosuit.obj");
+	m_assetBox->LoadAsset("nanosuit", "Models/c_mesh.obj");
+
+	m_mainLight->m_rComp = new RenderComponent(m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj());
+	m_mainLight->m_rComp->m_rcModel = m_assetBox->GetAsset("nanosuit");
+	m_lightmat = glm::translate(glm::mat4(1.0f), m_mainLight->position);
+	m_mainLight->m_renderNode = new RenderNode(&m_lightmat, m_mainLight->m_rComp);
+	m_entityEngine->AddRenderNode(m_mainLight->m_renderNode);
 
 	m_testSpinningSquare = new SpinningSquare("test", m_assetBox->GetAsset("nanosuit"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
 	m_gOList.push_back(m_testSpinningSquare);

@@ -1,6 +1,7 @@
 #ifndef _ENTITY_SYSTEM_H_
 #define _ENTITY_SYSTEM_H_
 #include "EntityNodes.h"
+#include "FPSCamera.h"
 
 class ISystem
 {
@@ -13,6 +14,7 @@ public:
 class RenderSystem : public ISystem
 {
 private:
+	std::vector<FPSCamera*> m_cameraList;
 	std::vector<RenderNode*> m_rnList;
 	std::vector<PointLight*> m_plList;
 	std::vector<DirectionalLight*> m_dlList;
@@ -49,6 +51,7 @@ public:
 				glUniformMatrix4fv((*it)->render->m_shaderModelMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->position));
 				glUniformMatrix4fv((*it)->render->m_shaderViewMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->render->m_viewMatrix));
 				glUniformMatrix4fv((*it)->render->m_shaderProjMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->render->m_projMatrix));
+				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "cameraPos"), 1, glm::value_ptr(m_cameraList[0]->GetPos()));
 
 				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.position"), 1, glm::value_ptr(m_plList[0]->position));
 				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.ambient"), 1, glm::value_ptr(m_plList[0]->ambient));
@@ -107,6 +110,25 @@ public:
 			if ((*it) == in)
 			{
 				m_dlList.erase(it);
+				return;
+			}
+			++it;
+		}
+
+	}
+
+	void AddCamera(FPSCamera* in)
+	{
+		m_cameraList.push_back(in);
+	}
+
+	void RemoveCamera(FPSCamera* in)
+	{
+		for (std::vector<FPSCamera*>::iterator it = m_cameraList.begin(); it != m_cameraList.end();)
+		{
+			if ((*it) == in)
+			{
+				m_cameraList.erase(it);
 				return;
 			}
 			++it;

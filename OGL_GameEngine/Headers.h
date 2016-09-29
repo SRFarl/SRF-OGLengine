@@ -27,7 +27,8 @@
 #define PI 3.14159265359
 #define HALF_PI 1.57079632679
 
-
+class RenderComponent;
+class RenderNode;
 
 struct PointLight {
 	glm::vec3 position;
@@ -39,6 +40,9 @@ struct PointLight {
 	float constant;
 	float linear;
 	float quadratic;
+	
+	RenderComponent* m_rComp;
+	RenderNode* m_renderNode;
 };
 
 struct DirectionalLight {

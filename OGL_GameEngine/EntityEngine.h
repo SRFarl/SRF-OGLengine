@@ -58,6 +58,16 @@ public:
 		m_renderSystem->RemovePointLight(in);
 	}
 
+	void AddCamera(FPSCamera* in)
+	{
+		m_renderSystem->AddCamera(in);
+	}
+
+	void RemoveCamera(FPSCamera* in)
+	{
+		m_renderSystem->RemoveCamera(in);
+	}
+
 	//movable
 	void AddMovableNode(MovableNode* in)
 	{
