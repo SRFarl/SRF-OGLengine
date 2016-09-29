@@ -52,14 +52,19 @@ public:
 				glUniformMatrix4fv((*it)->render->m_shaderViewMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->render->m_viewMatrix));
 				glUniformMatrix4fv((*it)->render->m_shaderProjMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->render->m_projMatrix));
 				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "cameraPos"), 1, glm::value_ptr(m_cameraList[0]->GetPos()));
-
-				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.position"), 1, glm::value_ptr(m_plList[0]->position));
-				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.ambient"), 1, glm::value_ptr(m_plList[0]->ambient));
-				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.diffuse"), 1, glm::value_ptr(m_plList[0]->diffuse));
-				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "light.specular"), 1, glm::value_ptr(m_plList[0]->specular));
-				glUniform1f(glGetUniformLocation((*it)->render->m_program, "light.constant"), m_plList[0]->constant);
-				glUniform1f(glGetUniformLocation((*it)->render->m_program, "light.linear"), m_plList[0]->linear);
-				glUniform1f(glGetUniformLocation((*it)->render->m_program, "light.quadratic"), m_plList[0]->quadratic);
+				
+				for (int i = 0; i < m_plList.size(); i++)
+				{
+					std::string pLight = "pLight[";
+					pLight += std::to_string(i);
+					glUniform3fv(glGetUniformLocation((*it)->render->m_program, (pLight + "].position").c_str()), 1, glm::value_ptr(m_plList[i]->position));
+					glUniform3fv(glGetUniformLocation((*it)->render->m_program, (pLight + "].ambient").c_str()), 1, glm::value_ptr(m_plList[i]->ambient));
+					glUniform3fv(glGetUniformLocation((*it)->render->m_program, (pLight + "].diffuse").c_str()), 1, glm::value_ptr(m_plList[i]->diffuse));
+					glUniform3fv(glGetUniformLocation((*it)->render->m_program, (pLight + "].specular").c_str()), 1, glm::value_ptr(m_plList[i]->specular));
+					glUniform1f(glGetUniformLocation((*it)->render->m_program, (pLight + "].constant").c_str()), m_plList[i]->constant);
+					glUniform1f(glGetUniformLocation((*it)->render->m_program, (pLight + "].linear").c_str()), m_plList[i]->linear);
+					glUniform1f(glGetUniformLocation((*it)->render->m_program, (pLight + "].quadratic").c_str()), m_plList[i]->quadratic);
+				}
 
 				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.direction"), 1, glm::value_ptr(m_dlList[0]->direction));
 				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.ambient"), 1, glm::value_ptr(m_dlList[0]->ambient));

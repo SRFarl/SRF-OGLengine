@@ -54,6 +54,11 @@ public:
 			// And finally bind the texture
 			glBindTexture(GL_TEXTURE_2D, this->m_textures[i].id);
 		}
+		//enable or disable normalMapping depending if it's available
+		if (normalNr == 1)
+			glUniform1i(glGetUniformLocation(program, "normalMapping"), false);
+		else
+			glUniform1i(glGetUniformLocation(program, "normalMapping"), true);
 
 		// Draw mesh
 		glBindVertexArray(this->m_VAO);

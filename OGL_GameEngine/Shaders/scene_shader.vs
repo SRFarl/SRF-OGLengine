@@ -14,7 +14,7 @@ out VS_OUT {
 out mat3 TBN;
 out vec3 vNormalV;
 out vec3 fragPos;
-out vec2 outTexCoord;
+out vec2 texCoord;
 out vec3 cameraPos;
 } vs_out;
 
@@ -34,5 +34,5 @@ void main()
 	vs_out.fragPos = vec3(modelMat * position);
 	vs_out.vNormalV = mat3(transpose(inverse(modelMat))) * normal;
 	vs_out.cameraPos = cameraPos;
-	vs_out.outTexCoord = texCoord;
+	vs_out.texCoord = texCoord;
 }
