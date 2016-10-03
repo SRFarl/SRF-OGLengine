@@ -1,4 +1,6 @@
 # SRF-OGLengine
 Template/engine for an OpenGL program
 
-All rights reserved, Copyright Stephen Farley 2016
+To use this project for commercial use without permission is forbidden.
+
+email: stepfarley@gmail.com
