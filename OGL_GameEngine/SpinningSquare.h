@@ -5,11 +5,10 @@
 class SpinningSquare : public GameObject
 {
 public:
-	SpinningSquare(const std::string gameModelName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(gameModelName, initPos, initRot, false), m_gameEE(gameEE)
+	SpinningSquare(const std::string gameModelName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(gameModelName, initPos, false), m_gameEE(gameEE)
 	{
 		m_rComp = new RenderComponent(_program, viewMat, projMat);
 		m_rComp->m_rcModel = modelAsset;
-
 		m_renderNode = new RenderNode(&m_modelMatrix, m_rComp);
 		gameEE->AddRenderNode(m_renderNode);
 
@@ -17,7 +16,10 @@ public:
 		m_movableNode = new MovableNode(&m_position, m_mComp);
 		gameEE->AddMovableNode(m_movableNode);
 
-		m_rotAngles.y += glm::radians(0.1f);
+		m_roComp = new RotationComponent(initRot);
+		m_rotNode = new RotationNode(m_roComp);
+		gameEE->AddRotationNode(m_rotNode);
+
 	}
 
 	~SpinningSquare()
@@ -29,18 +31,20 @@ public:
 		m_gameEE->RemoveMovableNode(m_movableNode);
 		delete m_movableNode;
 		delete m_mComp;
+
+		m_gameEE->RemoveRotationNode(m_rotNode);
+		delete m_rotNode;
+		delete m_roComp;
 	}
 
 	void Update(float deltaT)
 	{
-		//m_rotAngles.x += glm::radians(1.f) * deltaT;
-		//m_rotAngles.y += glm::radians(1.f) * deltaT;
-		//m_rotAngles.z += glm::radians(1.f) * deltaT;
+
+		m_roComp->m_rotAngles.y += glm::radians(0.1f);
 
 		if (!m_isStatic)
 		{
-			UpdateObjectRotation();
-			m_modelMatrix = glm::translate(glm::mat4(1.0f), m_position) * glm::toMat4(m_quat);
+			m_modelMatrix = glm::translate(glm::mat4(1.0f), m_position) * glm::toMat4(m_roComp->m_quat);
 		}
 	}
 
@@ -50,6 +54,10 @@ private:
 
 	RenderComponent* m_rComp;
 	RenderNode* m_renderNode;
+
+	RotationComponent* m_roComp;
+	RotationNode* m_rotNode;
+
 	EntityEngine* m_gameEE;
 
 };

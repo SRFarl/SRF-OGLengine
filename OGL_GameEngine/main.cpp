@@ -62,7 +62,7 @@ CmainApp::CmainApp(int argc, char *argv[])
 	, m_uiFrameRate(30)
 	, m_Window(NULL)
 	, m_Glcontext(NULL)
-	, m_fCameraSens(8.0f)
+	, m_fCameraSens(16.0f)
 {
 	for (int i = 1; i < argc; i++)
 	{
@@ -214,7 +214,7 @@ void CmainApp::BInitGame()
 	m_mainLight->m_renderNode = new RenderNode(&m_lightmat, m_mainLight->m_rComp);
 	m_entityEngine->AddRenderNode(m_mainLight->m_renderNode);
 
-	m_testSpinningSquare = new SpinningSquare("test", m_assetBox->GetAsset("nanosuit"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+	m_testSpinningSquare = new SpinningSquare("test", m_assetBox->GetAsset("nanosuit"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(glm::radians(10.0f), 0, 0));
 	m_gOList.push_back(m_testSpinningSquare);
 }
 

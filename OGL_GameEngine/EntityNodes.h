@@ -20,4 +20,12 @@ public:
 	MovableComponent* movable;
 };
 
+class RotationNode
+{
+public:
+	RotationNode(RotationComponent* _rotation) : rotation(_rotation) {};
+
+	RotationComponent* rotation;
+};
+
 #endif
