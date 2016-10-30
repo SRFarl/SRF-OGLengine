@@ -7,13 +7,13 @@ class EntityEngine
 private:
 	RenderSystem* m_renderSystem;
 	MovableSystem* m_movableSystem;
-	RotationSystem* m_rotationSystem;
+	TransformSystem* m_transformSystem;
 
 public:
 	EntityEngine()
 	{
 		m_movableSystem = new MovableSystem();
-		m_rotationSystem = new RotationSystem();
+		m_transformSystem = new TransformSystem();
 		m_renderSystem = new RenderSystem();
 	}
 
@@ -26,7 +26,7 @@ public:
 	void Update(float deltaT)
 	{
 		m_movableSystem->Update(deltaT);
-		m_rotationSystem->Update(deltaT);
+		m_transformSystem->Update(deltaT);
 		m_renderSystem->Update(deltaT);
 	}
 
@@ -82,16 +82,16 @@ public:
 		m_movableSystem->RemoveNode(in);
 	}
 
-	//rotation
-	void AddRotationNode(RotationNode* in)
+	//transform
+	void AddTransformNode(TransformNode* in)
 	{
-		m_rotationSystem->AddNode(in);
-		m_rotationSystem->UpdateForOne(in);
+		m_transformSystem->AddNode(in);
+		m_transformSystem->UpdateForOne(in);
 	}
 
-	void RemoveRotationNode(RotationNode* in)
+	void RemoveTransformNode(TransformNode* in)
 	{
-		m_rotationSystem->RemoveNode(in);
+		m_transformSystem->RemoveNode(in);
 	}
 };
 

@@ -38,15 +38,19 @@ public:
 	glm::vec3 m_velocity;
 };
 
-class RotationComponent
+class TransformComponent
 {
 public:
-	RotationComponent(glm::vec3 _initRot) :
+	TransformComponent(glm::vec3 _initPos, glm::vec3 _initRot) :
+		m_position(_initPos),
 		m_rotAngles(_initRot),
 		m_quatRight(1.0f, 0.f, 0.f),
 		m_quatUp(0.f, 1.0f, 0.f),
 		m_quatForward(0.f, 0.f, 1.0f)
 	{}
+	glm::vec3 m_position;
+
+	glm::mat4 m_modelMatrix;
 
 	glm::quat m_quat;
 	glm::vec3 m_rotAngles;

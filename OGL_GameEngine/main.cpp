@@ -46,7 +46,6 @@ private: //GL
 private: //Game objects
 	FPSCamera* m_fpsCam;
 	PointLight* m_mainLight;
-	glm::mat4 m_lightmat;
 	DirectionalLight* m_mainDLight;
 
 	std::vector<GameObject*> m_gOList;
@@ -208,10 +207,13 @@ void CmainApp::BInitGame()
 	//load assets
 	m_assetBox->LoadAsset("nanosuit", "Models/c_mesh.obj");
 
+	m_mainLight->m_tComp = new TransformComponent(glm::vec3(1.0f, 3.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	m_mainLight->m_tNode = new TransformNode(m_mainLight->m_tComp);
+	m_entityEngine->AddTransformNode(m_mainLight->m_tNode);
+
 	m_mainLight->m_rComp = new RenderComponent(m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj());
 	m_mainLight->m_rComp->m_rcModel = m_assetBox->GetAsset("nanosuit");
-	m_lightmat = glm::translate(glm::mat4(1.0f), m_mainLight->position);
-	m_mainLight->m_renderNode = new RenderNode(&m_lightmat, m_mainLight->m_rComp);
+	m_mainLight->m_renderNode = new RenderNode(m_mainLight->m_rComp, m_mainLight->m_tComp);
 	m_entityEngine->AddRenderNode(m_mainLight->m_renderNode);
 
 	m_testSpinningSquare = new SpinningSquare("test", m_assetBox->GetAsset("nanosuit"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(glm::radians(10.0f), 0, 0));

@@ -46,9 +46,10 @@ public:
 		{
 			for (std::vector<Mesh>::iterator it2 = (*it)->render->m_rcModel->m_meshes.begin(); it2 != (*it)->render->m_rcModel->m_meshes.end();)
 			{
+				//rendering
 				glUseProgram((*it)->render->m_program);
 
-				glUniformMatrix4fv((*it)->render->m_shaderModelMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->position));
+				glUniformMatrix4fv((*it)->render->m_shaderModelMatLocation, 1, GL_FALSE, glm::value_ptr((*it)->transform->m_modelMatrix));
 				glUniformMatrix4fv((*it)->render->m_shaderViewMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->render->m_viewMatrix));
 				glUniformMatrix4fv((*it)->render->m_shaderProjMatLocation, 1, GL_FALSE, glm::value_ptr(*(*it)->render->m_projMatrix));
 				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "cameraPos"), 1, glm::value_ptr(m_cameraList[0]->GetPos()));
@@ -176,7 +177,7 @@ public:
 
 			(*it)->movable->m_velocity = (*it)->movable->m_velocity + ((*it)->movable->m_acceleration * deltaT);
 
-			*(*it)->position += (*it)->movable->m_velocity * deltaT;
+			(*it)->transform->m_position += (*it)->movable->m_velocity * deltaT;
 
 			it++;
 		}
@@ -184,25 +185,25 @@ public:
 
 };
 
-class RotationSystem : public ISystem
+class TransformSystem : public ISystem
 {
 private:
-	std::vector<RotationNode*> m_rnList;
+	std::vector<TransformNode*> m_tnList;
 
 public:
 
-	void AddNode(RotationNode* in)
+	void AddNode(TransformNode* in)
 	{
-		m_rnList.push_back(in);
+		m_tnList.push_back(in);
 	}
 
-	void RemoveNode(RotationNode* in)
+	void RemoveNode(TransformNode* in)
 	{
-		for (std::vector<RotationNode*>::iterator it = m_rnList.begin(); it != m_rnList.end();)
+		for (std::vector<TransformNode*>::iterator it = m_tnList.begin(); it != m_tnList.end();)
 		{
 			if ((*it) == in)
 			{
-				m_rnList.erase(it);
+				m_tnList.erase(it);
 				return;
 			}
 			++it;
@@ -212,76 +213,77 @@ public:
 
 	void Update(float deltaT)
 	{
-		for (std::vector<RotationNode*>::iterator it = m_rnList.begin(); it != m_rnList.end();)
+		for (std::vector<TransformNode*>::iterator it = m_tnList.begin(); it != m_tnList.end();)
 		{
 
 			//QUATERNIONS
-			glm::quat quatX = glm::angleAxis((*it)->rotation->m_rotAngles.x, (*it)->rotation->m_quatRight);
+			glm::quat quatX = glm::angleAxis((*it)->transform->m_rotAngles.x, (*it)->transform->m_quatRight);
 
-			(*it)->rotation->m_quatUp = quatX * (*it)->rotation->m_quatUp;
-			(*it)->rotation->m_quatForward = quatX * (*it)->rotation->m_quatForward;
+			(*it)->transform->m_quatUp = quatX * (*it)->transform->m_quatUp;
+			(*it)->transform->m_quatForward = quatX * (*it)->transform->m_quatForward;
 
-			glm::quat quatY = glm::angleAxis((*it)->rotation->m_rotAngles.y, (*it)->rotation->m_quatUp);
+			glm::quat quatY = glm::angleAxis((*it)->transform->m_rotAngles.y, (*it)->transform->m_quatUp);
 
-			(*it)->rotation->m_quatRight = quatY * (*it)->rotation->m_quatRight;
-			(*it)->rotation->m_quatForward = quatY * (*it)->rotation->m_quatForward;
+			(*it)->transform->m_quatRight = quatY * (*it)->transform->m_quatRight;
+			(*it)->transform->m_quatForward = quatY * (*it)->transform->m_quatForward;
 
-			glm::quat quatZ = glm::angleAxis((*it)->rotation->m_rotAngles.z, (*it)->rotation->m_quatForward);
+			glm::quat quatZ = glm::angleAxis((*it)->transform->m_rotAngles.z, (*it)->transform->m_quatForward);
 
-			(*it)->rotation->m_quatRight = quatZ * (*it)->rotation->m_quatRight;
-			(*it)->rotation->m_quatUp = quatZ * (*it)->rotation->m_quatUp;
+			(*it)->transform->m_quatRight = quatZ * (*it)->transform->m_quatRight;
+			(*it)->transform->m_quatUp = quatZ * (*it)->transform->m_quatUp;
 
 			//periodic re-ortho-normalization is needed to correct our axes
 
-			(*it)->rotation->m_quatUp = glm::cross((*it)->rotation->m_quatRight, (*it)->rotation->m_quatForward);
-			(*it)->rotation->m_quatRight = glm::cross((*it)->rotation->m_quatForward, (*it)->rotation->m_quatUp);
+			(*it)->transform->m_quatUp = glm::cross((*it)->transform->m_quatRight, (*it)->transform->m_quatForward);
+			(*it)->transform->m_quatRight = glm::cross((*it)->transform->m_quatForward, (*it)->transform->m_quatUp);
 
-			//normalise
+			//normalize
 
-			(*it)->rotation->m_quatRight = glm::normalize((*it)->rotation->m_quatRight);
-			(*it)->rotation->m_quatUp = glm::normalize((*it)->rotation->m_quatUp);
-			(*it)->rotation->m_quatForward = glm::normalize((*it)->rotation->m_quatForward);
+			(*it)->transform->m_quatRight = glm::normalize((*it)->transform->m_quatRight);
+			(*it)->transform->m_quatUp = glm::normalize((*it)->transform->m_quatUp);
+			(*it)->transform->m_quatForward = glm::normalize((*it)->transform->m_quatForward);
 
-			(*it)->rotation->m_quat = quatZ * quatY * quatX * (*it)->rotation->m_quat;
+			(*it)->transform->m_quat = quatZ * quatY * quatX * (*it)->transform->m_quat;
 
-			(*it)->rotation->m_rotAngles = glm::vec3(0);
+			(*it)->transform->m_rotAngles = glm::vec3(0);
+
+			(*it)->transform->m_modelMatrix = glm::translate(glm::mat4(1.0f), (*it)->transform->m_position) * glm::toMat4((*it)->transform->m_quat);
 
 			it++;
 		}
 	}
 
-	void UpdateForOne(RotationNode* _rn)
+	void UpdateForOne(TransformNode* _tn)
 	{
 		//QUATERNIONS
-		glm::quat quatX = glm::angleAxis(_rn->rotation->m_rotAngles.x, _rn->rotation->m_quatRight);
+		glm::quat quatX = glm::angleAxis(_tn->transform->m_rotAngles.x, _tn->transform->m_quatRight);
 
-		_rn->rotation->m_quatUp = quatX * _rn->rotation->m_quatUp;
-		_rn->rotation->m_quatForward = quatX * _rn->rotation->m_quatForward;
+		_tn->transform->m_quatUp = quatX * _tn->transform->m_quatUp;
+		_tn->transform->m_quatForward = quatX * _tn->transform->m_quatForward;
 
-		glm::quat quatY = glm::angleAxis(_rn->rotation->m_rotAngles.y, _rn->rotation->m_quatUp);
+		glm::quat quatY = glm::angleAxis(_tn->transform->m_rotAngles.y, _tn->transform->m_quatUp);
 
-		_rn->rotation->m_quatRight = quatY * _rn->rotation->m_quatRight;
-		_rn->rotation->m_quatForward = quatY * _rn->rotation->m_quatForward;
+		_tn->transform->m_quatRight = quatY * _tn->transform->m_quatRight;
+		_tn->transform->m_quatForward = quatY * _tn->transform->m_quatForward;
 
-		glm::quat quatZ = glm::angleAxis(_rn->rotation->m_rotAngles.z, _rn->rotation->m_quatForward);
+		glm::quat quatZ = glm::angleAxis(_tn->transform->m_rotAngles.z, _tn->transform->m_quatForward);
 
-		_rn->rotation->m_quatRight = quatZ * _rn->rotation->m_quatRight;
-		_rn->rotation->m_quatUp = quatZ * _rn->rotation->m_quatUp;
+		_tn->transform->m_quatRight = quatZ * _tn->transform->m_quatRight;
+		_tn->transform->m_quatUp = quatZ * _tn->transform->m_quatUp;
 
 		//periodic re-ortho-normalization is needed to correct our axes
 
-		_rn->rotation->m_quatUp = glm::cross(_rn->rotation->m_quatRight, _rn->rotation->m_quatForward);
-		_rn->rotation->m_quatRight = glm::cross(_rn->rotation->m_quatForward, _rn->rotation->m_quatUp);
+		_tn->transform->m_quatUp = glm::cross(_tn->transform->m_quatRight, _tn->transform->m_quatForward);
+		_tn->transform->m_quatRight = glm::cross(_tn->transform->m_quatForward, _tn->transform->m_quatUp);
 
-		//normalise
+		//normalize
 
-		_rn->rotation->m_quatRight = glm::normalize(_rn->rotation->m_quatRight);
-		_rn->rotation->m_quatUp = glm::normalize(_rn->rotation->m_quatUp);
-		_rn->rotation->m_quatForward = glm::normalize(_rn->rotation->m_quatForward);
+		_tn->transform->m_quatRight = glm::normalize(_tn->transform->m_quatRight);
+		_tn->transform->m_quatUp = glm::normalize(_tn->transform->m_quatUp);
+		_tn->transform->m_quatForward = glm::normalize(_tn->transform->m_quatForward);
+		_tn->transform->m_quat = quatZ * quatY * quatX * _tn->transform->m_quat;
 		
-		_rn->rotation->m_quat = quatZ * quatY * quatX * _rn->rotation->m_quat;
-		
-		_rn->rotation->m_rotAngles = glm::vec3(0);
+		_tn->transform->m_rotAngles = glm::vec3(0);
 	}
 
 };

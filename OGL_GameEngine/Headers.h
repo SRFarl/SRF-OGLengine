@@ -29,6 +29,8 @@
 
 class RenderComponent;
 class RenderNode;
+class TransformComponent;
+class TransformNode;
 
 struct PointLight {
 	glm::vec3 position;
@@ -43,6 +45,8 @@ struct PointLight {
 	
 	RenderComponent* m_rComp;
 	RenderNode* m_renderNode;
+	TransformComponent* m_tComp;
+	TransformNode* m_tNode;
 };
 
 struct DirectionalLight {
