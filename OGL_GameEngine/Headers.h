@@ -26,6 +26,7 @@
 #define FRAMERATE 60
 #define PI 3.14159265359
 #define HALF_PI 1.57079632679
+#define GAMMA_CORRECTION 2.2
 
 class RenderComponent;
 class RenderNode;

@@ -6,6 +6,8 @@
 #include "FPSCamera.h"
 #include "AssetBox.h"
 #include "EntityEngine.h"
+#include "Math.h"
+#include "StaticObject.h"
 
 class CmainApp
 {
@@ -51,6 +53,7 @@ private: //Game objects
 	std::vector<GameObject*> m_gOList;
 	SpinningSquare* m_testSpinningSquare;
 	SpinningSquare* m_testSpinningSquare2;
+	StaticObject* m_woodFloor;
 
 };
 
@@ -185,10 +188,10 @@ void CmainApp::BInitGame()
 	m_entityEngine = new EntityEngine();
 
 	m_mainLight = new PointLight;
-	m_mainLight->position = glm::vec3(1.0f, 3.0f, 2.0f);
+	m_mainLight->position = glm::vec3(0.0f, 0.5f, 0.0f);
 	m_mainLight->diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
 	m_mainLight->specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	m_mainLight->ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+	m_mainLight->ambient = glm::vec3(0.0f, 0.0f, 0.0f);
 	m_mainLight->constant = 1.0f;
 	m_mainLight->linear = 0.09f;
 	m_mainLight->quadratic = 0.032f;
@@ -196,9 +199,9 @@ void CmainApp::BInitGame()
 
 	m_mainDLight = new DirectionalLight;
 	m_mainDLight->direction = glm::vec3(-1.0f, -5.0f, 1.0f);
-	m_mainDLight->diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
+	m_mainDLight->diffuse = glm::vec3(0.1f, 0.1f, 0.1f);
 	m_mainDLight->specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	m_mainDLight->ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+	m_mainDLight->ambient = glm::vec3(0.0f, 0.0f, 0.0f);
 	m_entityEngine->AddRenderDirectionalLight(m_mainDLight);
 
 	m_fpsCam = new FPSCamera(m_fCameraSens);
@@ -206,8 +209,9 @@ void CmainApp::BInitGame()
 
 	//load assets
 	m_assetBox->LoadAsset("nanosuit", "Models/c_mesh.obj");
+	m_assetBox->LoadAsset("woodfloor", "Models/woodfloor/woodfloor.obj");
 
-	m_mainLight->m_tComp = new TransformComponent(glm::vec3(1.0f, 3.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	m_mainLight->m_tComp = new TransformComponent(glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), false);
 	m_mainLight->m_tNode = new TransformNode(m_mainLight->m_tComp);
 	m_entityEngine->AddTransformNode(m_mainLight->m_tNode);
 
@@ -216,8 +220,10 @@ void CmainApp::BInitGame()
 	m_mainLight->m_renderNode = new RenderNode(m_mainLight->m_rComp, m_mainLight->m_tComp);
 	m_entityEngine->AddRenderNode(m_mainLight->m_renderNode);
 
-	m_testSpinningSquare = new SpinningSquare("test", m_assetBox->GetAsset("nanosuit"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(glm::radians(10.0f), 0, 0));
-	m_gOList.push_back(m_testSpinningSquare);
+	//m_testSpinningSquare = new SpinningSquare("test", m_assetBox->GetAsset("nanosuit"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(glm::radians(10.0f), 0, 0));
+	//m_gOList.push_back(m_testSpinningSquare);
+	m_woodFloor = new StaticObject("floor", m_assetBox->GetAsset("woodfloor"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, -1, 0), glm::vec3(0, 0, 0));
+	m_gOList.push_back(m_woodFloor);
 }
 
 void CmainApp::DebugCalls()
@@ -244,7 +250,7 @@ void CmainApp::RunMainLoop()
 			it++;
 		}
 
-		glClearColor(0.5f, 0.5f, 0.1f, 0.0f);
+		glClearColor(0.1f, 0.1f, 0.05f, 0.0f);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

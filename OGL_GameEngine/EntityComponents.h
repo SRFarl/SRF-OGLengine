@@ -41,12 +41,13 @@ public:
 class TransformComponent
 {
 public:
-	TransformComponent(glm::vec3 _initPos, glm::vec3 _initRot) :
+	TransformComponent(glm::vec3 _initPos, glm::vec3 _initRot, bool _isStatic) :
 		m_position(_initPos),
 		m_rotAngles(_initRot),
 		m_quatRight(1.0f, 0.f, 0.f),
 		m_quatUp(0.f, 1.0f, 0.f),
-		m_quatForward(0.f, 0.f, 1.0f)
+		m_quatForward(0.f, 0.f, 1.0f),
+		m_isStatic(_isStatic)
 	{}
 	glm::vec3 m_position;
 
@@ -57,5 +58,7 @@ public:
 	glm::vec3 m_quatRight;
 	glm::vec3 m_quatUp;
 	glm::vec3 m_quatForward;
+
+	bool m_isStatic;
 };
 #endif

@@ -40,6 +40,7 @@ uniform Material material;
 uniform PointLight pLight[NR_POINT_LIGHTS];
 uniform DirectionalLight dLight;
 uniform bool normalMapping;
+uniform float gamma;
 
 out vec4 outputColor;
 
@@ -66,19 +67,25 @@ void main()
 	outputColourV3 += RenderDirectionalLight(dLight, normal, viewDir);
 	
 	outputColor = vec4(outputColourV3 , 1.0f);
+	
+	//gamma correction
+	outputColor = pow(outputColor, vec4(1.0/gamma));
 }
 
 vec3 RenderDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
 {
+	//de-gamma the texture
+	vec3 diffuseColour = vec3(pow(texture(material.diffuse1, fs_in.texCoord),vec4(gamma)));
+
 	//directional light
 	vec3 lightDir = normalize(-light.direction);
 	
 	// Ambient
-	vec3 ambient = light.ambient * vec3(texture(material.diffuse1, fs_in.texCoord));
+	vec3 ambient = light.ambient * diffuseColour;
 	
 	// Diffuse 
 	float diff = max(dot(normal, lightDir), 0.0);
-	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse1, fs_in.texCoord));
+	vec3 diffuse = light.diffuse * diff * diffuseColour;
 	
 	// Specular
 	vec3 reflectDir = reflect(-lightDir, normal);  
@@ -90,6 +97,9 @@ vec3 RenderDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
 
 vec3 RenderPointLight(PointLight light, vec3 normal, vec3 viewDir)
 {
+	//de-gamma the texture
+	vec3 diffuseColour = vec3(pow(texture(material.diffuse1, fs_in.texCoord),vec4(gamma)));
+
 	//point light 	
 	vec3 lightDir = normalize((light.position) - fs_in.fragPos);
 	
@@ -98,11 +108,11 @@ vec3 RenderPointLight(PointLight light, vec3 normal, vec3 viewDir)
 	float attenuation = 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance)); 
 	
 	// Ambient
-	vec3 ambient = light.ambient * vec3(texture(material.diffuse1, fs_in.texCoord)) * attenuation;
+	vec3 ambient = light.ambient * diffuseColour * attenuation;
 	
 	// Diffuse 
 	float diff = max(dot(normal, lightDir), 0.0);
-	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse1, fs_in.texCoord)) * attenuation;  
+	vec3 diffuse = light.diffuse * diff * diffuseColour * attenuation;  
 
 	// Specular
 	vec3 reflectDir = reflect(-lightDir, normal);  

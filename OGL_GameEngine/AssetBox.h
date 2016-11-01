@@ -41,6 +41,8 @@ public:
 
 			it++;
 		}
+
+		return NULL;
 	}
 
 private:

@@ -74,6 +74,8 @@ public:
 
 				glUniform1f(glGetUniformLocation((*it)->render->m_program, "material.shininess"), 16.0f);
 
+				glUniform1f(glGetUniformLocation((*it)->render->m_program, "gamma"), GAMMA_CORRECTION);
+
 				(*it2).Draw((*it)->render->m_program);
 
 				glUseProgram(0);
@@ -215,39 +217,41 @@ public:
 	{
 		for (std::vector<TransformNode*>::iterator it = m_tnList.begin(); it != m_tnList.end();)
 		{
+			if (!(*it)->transform->m_isStatic)
+			{
+				//QUATERNIONS
+				glm::quat quatX = glm::angleAxis((*it)->transform->m_rotAngles.x, (*it)->transform->m_quatRight);
 
-			//QUATERNIONS
-			glm::quat quatX = glm::angleAxis((*it)->transform->m_rotAngles.x, (*it)->transform->m_quatRight);
+				(*it)->transform->m_quatUp = quatX * (*it)->transform->m_quatUp;
+				(*it)->transform->m_quatForward = quatX * (*it)->transform->m_quatForward;
 
-			(*it)->transform->m_quatUp = quatX * (*it)->transform->m_quatUp;
-			(*it)->transform->m_quatForward = quatX * (*it)->transform->m_quatForward;
+				glm::quat quatY = glm::angleAxis((*it)->transform->m_rotAngles.y, (*it)->transform->m_quatUp);
 
-			glm::quat quatY = glm::angleAxis((*it)->transform->m_rotAngles.y, (*it)->transform->m_quatUp);
+				(*it)->transform->m_quatRight = quatY * (*it)->transform->m_quatRight;
+				(*it)->transform->m_quatForward = quatY * (*it)->transform->m_quatForward;
 
-			(*it)->transform->m_quatRight = quatY * (*it)->transform->m_quatRight;
-			(*it)->transform->m_quatForward = quatY * (*it)->transform->m_quatForward;
+				glm::quat quatZ = glm::angleAxis((*it)->transform->m_rotAngles.z, (*it)->transform->m_quatForward);
 
-			glm::quat quatZ = glm::angleAxis((*it)->transform->m_rotAngles.z, (*it)->transform->m_quatForward);
+				(*it)->transform->m_quatRight = quatZ * (*it)->transform->m_quatRight;
+				(*it)->transform->m_quatUp = quatZ * (*it)->transform->m_quatUp;
 
-			(*it)->transform->m_quatRight = quatZ * (*it)->transform->m_quatRight;
-			(*it)->transform->m_quatUp = quatZ * (*it)->transform->m_quatUp;
+				//periodic re-ortho-normalization is needed to correct our axes
 
-			//periodic re-ortho-normalization is needed to correct our axes
+				(*it)->transform->m_quatUp = glm::cross((*it)->transform->m_quatRight, (*it)->transform->m_quatForward);
+				(*it)->transform->m_quatRight = glm::cross((*it)->transform->m_quatForward, (*it)->transform->m_quatUp);
 
-			(*it)->transform->m_quatUp = glm::cross((*it)->transform->m_quatRight, (*it)->transform->m_quatForward);
-			(*it)->transform->m_quatRight = glm::cross((*it)->transform->m_quatForward, (*it)->transform->m_quatUp);
+				//normalize
 
-			//normalize
+				(*it)->transform->m_quatRight = glm::normalize((*it)->transform->m_quatRight);
+				(*it)->transform->m_quatUp = glm::normalize((*it)->transform->m_quatUp);
+				(*it)->transform->m_quatForward = glm::normalize((*it)->transform->m_quatForward);
 
-			(*it)->transform->m_quatRight = glm::normalize((*it)->transform->m_quatRight);
-			(*it)->transform->m_quatUp = glm::normalize((*it)->transform->m_quatUp);
-			(*it)->transform->m_quatForward = glm::normalize((*it)->transform->m_quatForward);
+				(*it)->transform->m_quat = quatZ * quatY * quatX * (*it)->transform->m_quat;
 
-			(*it)->transform->m_quat = quatZ * quatY * quatX * (*it)->transform->m_quat;
+				(*it)->transform->m_rotAngles = glm::vec3(0);
 
-			(*it)->transform->m_rotAngles = glm::vec3(0);
-
-			(*it)->transform->m_modelMatrix = glm::translate(glm::mat4(1.0f), (*it)->transform->m_position) * glm::toMat4((*it)->transform->m_quat);
+				(*it)->transform->m_modelMatrix = glm::translate(glm::mat4(1.0f), (*it)->transform->m_position) * glm::toMat4((*it)->transform->m_quat);
+			}
 
 			it++;
 		}
@@ -284,6 +288,8 @@ public:
 		_tn->transform->m_quat = quatZ * quatY * quatX * _tn->transform->m_quat;
 		
 		_tn->transform->m_rotAngles = glm::vec3(0);
+
+		_tn->transform->m_modelMatrix = glm::translate(glm::mat4(1.0f), _tn->transform->m_position) * glm::toMat4(_tn->transform->m_quat);
 	}
 
 };

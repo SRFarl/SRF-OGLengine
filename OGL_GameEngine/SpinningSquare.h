@@ -7,7 +7,7 @@ class SpinningSquare : public GameObject
 public:
 	SpinningSquare(const std::string gameModelName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(gameModelName), m_gameEE(gameEE)
 	{
-		m_transformComp = new TransformComponent(initPos, initRot);
+		m_transformComp = new TransformComponent(initPos, initRot, false);
 		m_transformNode = new TransformNode(m_transformComp);
 		gameEE->AddTransformNode(m_transformNode);
 
@@ -39,7 +39,6 @@ public:
 	void Update(float deltaT)
 	{
 		m_transformComp->m_rotAngles.y += glm::radians(0.1f);
-
 	}
 
 private:
