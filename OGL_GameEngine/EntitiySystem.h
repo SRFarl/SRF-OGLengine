@@ -314,6 +314,7 @@ class CollisionSystem : public ISystem
 {
 private:
 	std::vector<SphereCollisionNode*> m_scList;
+	std::vector<AABBCollisionNode*> m_aabbList;
 
 public:
 
@@ -335,8 +336,27 @@ public:
 		}
 	}
 
+	void AddAABBCollisionNode(AABBCollisionNode* in)
+	{
+		m_aabbList.push_back(in);
+	}
+
+	void RemoveAABBCollisionNode(AABBCollisionNode* in)
+	{
+		for (std::vector<AABBCollisionNode*>::iterator it = m_aabbList.begin(); it != m_aabbList.end();)
+		{
+			if ((*it) == in)
+			{
+				m_aabbList.erase(it);
+				return;
+			}
+			++it;
+		}
+	}
+
 	void Update(float deltaT)
 	{
+		//SPHERE
 		for (std::vector<SphereCollisionNode*>::iterator it = m_scList.begin(); it != m_scList.end();)
 		{
 			if (!(*it)->transform->m_isStatic && (*it)->movable->m_velocity != glm::vec3(0))
@@ -403,15 +423,30 @@ public:
 							}
 						}
 					}
-
 					it2++;
 				}
 			}
+			it++;
+		}
 
+		//AABB
+		for (std::vector<AABBCollisionNode*>::iterator it = m_aabbList.begin(); it != m_aabbList.end();)
+		{
+			if (!(*it)->transform->m_isStatic && (*it)->movable->m_velocity != glm::vec3(0))
+			{
+				//this AABB is not a static sphere therefore leave it to the non-static objects to calculate collision
+				for (std::vector<AABBCollisionNode*>::iterator it2 = m_aabbList.begin(); it2 != m_aabbList.end();)
+				{
+					if (it2 != it)
+					{
+
+					}
+					it2++;
+				}
+			}
 			it++;
 		}
 	}
-
 };
 
 

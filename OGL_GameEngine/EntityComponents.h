@@ -80,4 +80,20 @@ public:
 	float m_radius;
 
 };
+
+class AABBCollisionComponent
+{
+public:
+	AABBCollisionComponent(glm::vec3 _min, glm::vec3 _max, glm::vec3 _mid, float _damping) :
+		m_minOffset(_min),
+		m_maxOffset(_max),
+		m_midOffset(_mid),
+		m_damping(_damping)
+	{}
+
+	float m_damping;
+	glm::vec3 m_minOffset;
+	glm::vec3 m_maxOffset;
+	glm::vec3 m_midOffset;
+};
 #endif

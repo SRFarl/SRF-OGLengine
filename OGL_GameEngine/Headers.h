@@ -43,11 +43,6 @@ struct PointLight {
 	float constant;
 	float linear;
 	float quadratic;
-	
-	RenderComponent* m_rComp;
-	RenderNode* m_renderNode;
-	TransformComponent* m_tComp;
-	TransformNode* m_tNode;
 };
 
 struct DirectionalLight {

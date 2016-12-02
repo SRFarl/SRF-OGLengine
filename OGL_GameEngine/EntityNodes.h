@@ -39,4 +39,15 @@ public:
 	TransformComponent* transform;
 };
 
+class AABBCollisionNode
+{
+public:
+	AABBCollisionNode(AABBCollisionComponent* _aabbCollision, TransformComponent* _transform) : aabbCollision(_aabbCollision), movable(NULL), transform(_transform){};
+	AABBCollisionNode(AABBCollisionComponent* _aabbCollision, TransformComponent* _transform, MovableComponent* _movable) : aabbCollision(_aabbCollision), movable(_movable), transform(_transform){};
+
+	AABBCollisionComponent* aabbCollision;
+	MovableComponent* movable;
+	TransformComponent* transform;
+};
+
 #endif

@@ -109,6 +109,16 @@ public:
 	{
 		m_collisionSystem->RemoveSphereCollisionNode(in);
 	}
+
+	void AddAABBCollisionNode(AABBCollisionNode* in)
+	{
+		m_collisionSystem->AddAABBCollisionNode(in);
+	}
+
+	void RemoveAABBCollisionNode(AABBCollisionNode* in)
+	{
+		m_collisionSystem->RemoveAABBCollisionNode(in);
+	}
 };
 
 #endif

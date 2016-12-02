@@ -2,10 +2,10 @@
 #include "GameObject.h"
 #include "Model.h"
 
-class SpinningSquare : public GameObject
+class GameSphere : public GameObject
 {
 public:
-	SpinningSquare(const std::string gameModelName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(gameModelName), m_gameEE(gameEE)
+	GameSphere(const std::string gameModelName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot, bool _gravity) : GameObject(gameModelName), m_gameEE(gameEE), gravity(_gravity)
 	{
 		m_transformComp = new TransformComponent(initPos, initRot, false);
 		m_transformNode = new TransformNode(m_transformComp);
@@ -20,41 +20,42 @@ public:
 		m_movableNode = new MovableNode(m_mComp, m_transformComp);
 		gameEE->AddMovableNode(m_movableNode);
 
-		glm::vec3 aabbmin;
-		glm::vec3 aabbmax;
-		glm::vec3 aabbmid;
-		modelAsset->BuildAABB(aabbmin, aabbmax, aabbmid);
-
-		m_aabbComp = new AABBCollisionComponent(aabbmin, aabbmax, aabbmid, 0.9f);
+		m_scComponent = new SphereCollsionComponent(glm::vec3(0.0f), 1.0f, 0.95f);
+		m_scNode = new SphereCollisionNode(m_scComponent, m_transformComp, m_mComp);
+		gameEE->AddSphereCollisionNode(m_scNode);
 	}
 
-	~SpinningSquare()
+	~GameSphere()
 	{
-		m_gameEE->RemoveAABBCollisionNode(m_aabbNode);
-		delete m_aabbNode;
-		delete m_aabbComp;
-
 		m_gameEE->RemoveRenderNode(m_renderNode);
 		delete m_renderNode;
 		delete m_rComp;
 
-		m_gameEE->RemoveMovableNode(m_movableNode);
-		delete m_movableNode;
-		delete m_mComp;
-
 		m_gameEE->RemoveTransformNode(m_transformNode);
 		delete m_transformNode;
 		delete m_transformComp;
+
+		m_gameEE->RemoveMovableNode(m_movableNode);
+		delete m_mComp;
+		delete m_movableNode;
+
+		m_gameEE->RemoveSphereCollisionNode(m_scNode);
+		delete m_scComponent;
+		delete m_scNode;
 	}
 
 	void Update(float deltaT)
 	{
-		m_transformComp->m_rotAngles.y += glm::radians(0.1f);
+		if (gravity)
+			m_movableNode->movable->m_acceleration += glm::vec3(0, -9.8f, 0);
 	}
 
 private:
-	AABBCollisionComponent* m_aabbComp;
-	AABBCollisionNode* m_aabbNode;
+	bool gravity;
+
+private:
+	SphereCollsionComponent* m_scComponent;
+	SphereCollisionNode* m_scNode;
 
 	MovableComponent* m_mComp;
 	MovableNode* m_movableNode;

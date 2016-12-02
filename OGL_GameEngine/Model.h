@@ -42,6 +42,57 @@ public:
 
 	std::string GetName(){ return m_name; }
 
+	void BuildAABB(glm::vec3 &min, glm::vec3 &max, glm::vec3 &mid)
+	{
+		//loop over all the meshes and compare each vertice for min max
+		glm::vec3 tempMin = glm::vec3(0);
+		glm::vec3 tempMax = glm::vec3(0);
+		glm::vec3 tempMid = glm::vec3(0);
+
+		for (std::vector<Mesh>::iterator it = m_meshes.begin(); it != m_meshes.end();)
+		{
+			for (int i = 0; i < it->m_vertices.size(); i++)
+			{
+				if (it->m_vertices[i].Position.x < tempMin.x)
+				{
+					tempMin.x = it->m_vertices[i].Position.x;
+				}
+
+				if (it->m_vertices[i].Position.y < tempMin.y)
+				{
+					tempMin.y = it->m_vertices[i].Position.y;
+				}
+
+				if (it->m_vertices[i].Position.z < tempMin.z)
+				{
+					tempMin.z = it->m_vertices[i].Position.z;
+				}
+
+				if (it->m_vertices[i].Position.x > tempMax.x)
+				{
+					tempMax.x = it->m_vertices[i].Position.x;
+				}
+
+				if (it->m_vertices[i].Position.y > tempMax.y)
+				{
+					tempMax.y = it->m_vertices[i].Position.y;
+				}
+
+				if (it->m_vertices[i].Position.z > tempMax.z)
+				{
+					tempMax.z = it->m_vertices[i].Position.z;
+				}
+			}
+			it++;
+		}
+
+		tempMid = (tempMax + tempMin) * 0.5f;
+
+		min = tempMin;
+		max = tempMax;
+		mid = tempMid;
+	}
+
 	std::vector<Mesh> m_meshes;
 
 private:
