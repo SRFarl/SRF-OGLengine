@@ -26,6 +26,7 @@ class FPSCamera
 		
 		void UpdateCamera(float deltaTs, bool forward, bool backward, bool left, bool right, GLfloat mouseXRel, GLfloat mouseYRel);
 		
+		glm::vec3 CreateMouseRayFromCamera(float mouseXPos, float mouseYPos);
 		inline glm::vec3 GetPos() { return eye; }
 		inline glm::mat4* GetView() { return &view; };
 		inline glm::mat4* GetProj() { return &proj; };

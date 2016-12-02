@@ -8,6 +8,7 @@ private:
 	RenderSystem* m_renderSystem;
 	MovableSystem* m_movableSystem;
 	TransformSystem* m_transformSystem;
+	CollisionSystem* m_collisionSystem;
 
 public:
 	EntityEngine()
@@ -15,16 +16,20 @@ public:
 		m_movableSystem = new MovableSystem();
 		m_transformSystem = new TransformSystem();
 		m_renderSystem = new RenderSystem();
+		m_collisionSystem = new CollisionSystem();
 	}
 
 	~EntityEngine()
 	{
+		delete m_collisionSystem;
+		delete m_transformSystem;
 		delete m_renderSystem;
 		delete m_movableSystem;
 	}
 
 	void Update(float deltaT)
 	{
+		m_collisionSystem->Update(deltaT);
 		m_movableSystem->Update(deltaT);
 		m_transformSystem->Update(deltaT);
 		m_renderSystem->Update(deltaT);
@@ -92,6 +97,17 @@ public:
 	void RemoveTransformNode(TransformNode* in)
 	{
 		m_transformSystem->RemoveNode(in);
+	}
+
+	//collision
+	void AddSphereCollisionNode(SphereCollisionNode* in)
+	{
+		m_collisionSystem->AddSphereCollisionNode(in);
+	}
+
+	void RemoveSphereCollisionNode(SphereCollisionNode* in)
+	{
+		m_collisionSystem->RemoveSphereCollisionNode(in);
 	}
 };
 

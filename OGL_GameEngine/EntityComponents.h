@@ -29,11 +29,15 @@ public:
 class MovableComponent
 {
 public:
-	MovableComponent() : 
+	MovableComponent() :
 		m_acceleration(0.0f),
-		m_velocity(0.0f)
+		m_velocity(0.0f),
+		m_skipThisFrame(false),
+		m_mass(1.0f)
 	{}
 
+	float m_mass;
+	bool m_skipThisFrame;
 	glm::vec3 m_acceleration;
 	glm::vec3 m_velocity;
 };
@@ -60,5 +64,20 @@ public:
 	glm::vec3 m_quatForward;
 
 	bool m_isStatic;
+};
+
+class SphereCollsionComponent
+{
+public:
+	SphereCollsionComponent(glm::vec3 _centrePoint, float _radius, float _damping) :
+		m_centrePointOffset(_centrePoint),
+		m_radius(_radius),
+		m_damping(_damping)
+	{}
+
+	float m_damping;
+	glm::vec3 m_centrePointOffset;
+	float m_radius;
+
 };
 #endif

@@ -2,6 +2,7 @@
 #define _ENTITY_SYSTEM_H_
 #include "EntityNodes.h"
 #include "FPSCamera.h"
+#include "Math.h"
 
 class ISystem
 {
@@ -42,6 +43,10 @@ public:
 
 	void Update(float deltaT)
 	{
+		glClearColor(0.1f, 0.1f, 0.05f, 0.0f);
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		for (std::vector<RenderNode*>::iterator it = m_rnList.begin(); it != m_rnList.end();)
 		{
 			for (std::vector<Mesh>::iterator it2 = (*it)->render->m_rcModel->m_meshes.begin(); it2 != (*it)->render->m_rcModel->m_meshes.end();)
@@ -176,10 +181,19 @@ public:
 	{
 		for (std::vector<MovableNode*>::iterator it = m_mnList.begin(); it != m_mnList.end();)
 		{
+			if (!(*it)->movable->m_skipThisFrame)
+			{
+				(*it)->movable->m_velocity = (*it)->movable->m_velocity + ((*it)->movable->m_acceleration * deltaT);
 
-			(*it)->movable->m_velocity = (*it)->movable->m_velocity + ((*it)->movable->m_acceleration * deltaT);
+				(*it)->transform->m_position += (*it)->movable->m_velocity * deltaT;
 
-			(*it)->transform->m_position += (*it)->movable->m_velocity * deltaT;
+				(*it)->movable->m_acceleration = glm::vec3(0.0f);
+			}
+			else
+			{
+				(*it)->movable->m_acceleration = glm::vec3(0.0f);
+				(*it)->movable->m_skipThisFrame = false;
+			}
 
 			it++;
 		}
@@ -250,6 +264,8 @@ public:
 
 				(*it)->transform->m_rotAngles = glm::vec3(0);
 
+				glm::mat4 wut = glm::translate(glm::mat4(1.0f), (*it)->transform->m_position);
+
 				(*it)->transform->m_modelMatrix = glm::translate(glm::mat4(1.0f), (*it)->transform->m_position) * glm::toMat4((*it)->transform->m_quat);
 			}
 
@@ -293,5 +309,110 @@ public:
 	}
 
 };
+
+class CollisionSystem : public ISystem
+{
+private:
+	std::vector<SphereCollisionNode*> m_scList;
+
+public:
+
+	void AddSphereCollisionNode(SphereCollisionNode* in)
+	{
+		m_scList.push_back(in);
+	}
+
+	void RemoveSphereCollisionNode(SphereCollisionNode* in)
+	{
+		for (std::vector<SphereCollisionNode*>::iterator it = m_scList.begin(); it != m_scList.end();)
+		{
+			if ((*it) == in)
+			{
+				m_scList.erase(it);
+				return;
+			}
+			++it;
+		}
+	}
+
+	void Update(float deltaT)
+	{
+		for (std::vector<SphereCollisionNode*>::iterator it = m_scList.begin(); it != m_scList.end();)
+		{
+			if (!(*it)->transform->m_isStatic && (*it)->movable->m_velocity != glm::vec3(0))
+			{
+				//this sphere is not a static sphere therefore leave it to the non-static objects to calculate collision
+				for (std::vector<SphereCollisionNode*>::iterator it2 = m_scList.begin(); it2 != m_scList.end();)
+				{
+					if (it2 != it)
+					{
+						//don't check for collision against itself
+						if ((*it2)->transform->m_isStatic || (*it2)->movable == NULL)
+						{
+							//kinematic-static collision
+							glm::vec3 timestepVelocity = ((*it)->movable->m_velocity + ((*it)->movable->m_acceleration * deltaT)) * deltaT;
+
+							float magnitudeAlongBeforeCollsion = Math::KinematicSphereStaticSphereCollision(
+								(*it)->transform->m_position + (*it)->sCollision->m_centrePointOffset,		//CenterA
+								timestepVelocity,															//DirectionA
+								(*it)->sCollision->m_radius,												//RadiusA
+								(*it2)->transform->m_position + (*it2)->sCollision->m_centrePointOffset,	//CenterB
+								(*it2)->sCollision->m_radius												//RadiusB
+								);
+							if (magnitudeAlongBeforeCollsion > 0)
+							{
+								//the spheres will touch
+								//find normal of collision point on sphereB
+								glm::vec3 bNormal = glm::normalize(
+									(((*it)->transform->m_position + (*it)->sCollision->m_centrePointOffset) + (glm::normalize(timestepVelocity) * magnitudeAlongBeforeCollsion))
+									- ((*it2)->transform->m_position + (*it2)->sCollision->m_centrePointOffset)
+									);
+
+								float scalar = glm::dot(-bNormal, glm::normalize(timestepVelocity));
+								float lengthOfDirectionAfterCollision = (glm::length(timestepVelocity) - magnitudeAlongBeforeCollsion);
+
+								(*it)->transform->m_position = (*it)->transform->m_position + (timestepVelocity + (lengthOfDirectionAfterCollision * bNormal * scalar * 2.0f));
+								(*it)->movable->m_velocity = ((*it)->movable->m_velocity - (2 * glm::dot((*it)->movable->m_velocity, bNormal) * bNormal)) * (*it2)->sCollision->m_damping;
+								(*it)->movable->m_skipThisFrame = true;
+							}
+						}
+						else
+						{
+							//kinematic-kinematic collision
+							glm::vec3 timestepVelocityA = ((*it)->movable->m_velocity + ((*it)->movable->m_acceleration * deltaT)) * deltaT;
+							glm::vec3 timestepVelocityB = ((*it2)->movable->m_velocity + ((*it2)->movable->m_acceleration * deltaT)) * deltaT;
+
+							glm::vec3 resultA;
+							glm::vec3 resultB;
+
+							if (Math::KinematicSphereKinematicSphereCollision(
+								(*it)->transform->m_position + (*it)->sCollision->m_centrePointOffset,		//CenterA
+								timestepVelocityA,															//DirectionA
+								(*it)->sCollision->m_radius,												//RadiusA
+								(*it)->movable->m_mass,														//MassA
+								(*it2)->transform->m_position + (*it2)->sCollision->m_centrePointOffset,	//CenterB
+								timestepVelocityB,															//DirectionB
+								(*it2)->sCollision->m_radius,												//RadiusB
+								(*it2)->movable->m_mass,													//MassB
+								resultA,																	//ResultA
+								resultB																		//ResultB
+								))
+							{
+								(*it)->movable->m_velocity = resultA / deltaT;
+								(*it2)->movable->m_velocity = resultB / deltaT;
+							}
+						}
+					}
+
+					it2++;
+				}
+			}
+
+			it++;
+		}
+	}
+
+};
+
 
 #endif

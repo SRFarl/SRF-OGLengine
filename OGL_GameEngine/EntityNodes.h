@@ -28,4 +28,15 @@ public:
 	TransformComponent* transform;
 };
 
+class SphereCollisionNode
+{
+public:
+	SphereCollisionNode(SphereCollsionComponent* _sCollision, TransformComponent* _transform) : sCollision(_sCollision), movable(NULL), transform(_transform){};
+	SphereCollisionNode(SphereCollsionComponent* _sCollision, TransformComponent* _transform, MovableComponent* _movable) : sCollision(_sCollision), movable(_movable), transform(_transform){};
+
+	SphereCollsionComponent* sCollision;
+	MovableComponent* movable;
+	TransformComponent* transform;
+};
+
 #endif

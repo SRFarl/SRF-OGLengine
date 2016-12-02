@@ -68,3 +68,30 @@ void FPSCamera::UpdateCamera(float deltaTs, bool forward, bool backward, bool le
 	view = glm::lookAt(eye, eye + centre, up);
 
 }
+
+glm::vec3 FPSCamera::CreateMouseRayFromCamera(float mouseXPos, float mouseYPos)
+{
+	//https://capnramses.github.io//opengl/raycasting.html
+
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+
+	//convert to 3d normalised device coords
+	float x = (2.0f * mouseXPos) / viewport[2] - 1.0f;
+	float y = 1.0f - (2.0f * mouseYPos) / viewport[3];
+	float z = -1.0f;
+
+	std::cout << x << ", " << y << ", " << WINHEIGHT << std::endl;
+
+	//turn to 4d homogenous clip coords
+	glm::vec4 tempRay(x, y, z, 1.0f);
+
+	//clip space to eye space
+	tempRay = glm::inverse(proj) * tempRay;
+	tempRay = glm::vec4(tempRay.x, tempRay.y, -1.0f, 0.0f);
+
+	//convert to world space
+	glm::vec3 worldRay = glm::vec3(glm::inverse(view) * tempRay);
+
+	return glm::normalize(worldRay);
+}

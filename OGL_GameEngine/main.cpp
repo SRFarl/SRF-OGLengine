@@ -8,6 +8,7 @@
 #include "EntityEngine.h"
 #include "Math.h"
 #include "StaticObject.h"
+#include "GameSphere.h"
 
 class CmainApp
 {
@@ -51,10 +52,8 @@ private: //Game objects
 	DirectionalLight* m_mainDLight;
 
 	std::vector<GameObject*> m_gOList;
-	SpinningSquare* m_testSpinningSquare;
-	SpinningSquare* m_testSpinningSquare2;
 	StaticObject* m_woodFloor;
-
+	GameSphere* m_gameSphere;
 };
 
 CmainApp::CmainApp(int argc, char *argv[])
@@ -208,20 +207,25 @@ void CmainApp::BInitGame()
 	m_entityEngine->AddCamera(m_fpsCam);
 
 	//load assets
-	m_assetBox->LoadAsset("nanosuit", "Models/c_mesh.obj");
+	m_assetBox->LoadAsset("sphere", "Models/Sphere/Sphere.obj");
 	m_assetBox->LoadAsset("woodfloor", "Models/woodfloor/woodfloor.obj");
 
-	m_mainLight->m_tComp = new TransformComponent(glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), false);
-	m_mainLight->m_tNode = new TransformNode(m_mainLight->m_tComp);
-	m_entityEngine->AddTransformNode(m_mainLight->m_tNode);
+	//m_mainLight->m_tComp = new TransformComponent(glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), false);
+	//m_mainLight->m_tNode = new TransformNode(m_mainLight->m_tComp);
+	//m_entityEngine->AddTransformNode(m_mainLight->m_tNode);
 
-	m_mainLight->m_rComp = new RenderComponent(m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj());
-	m_mainLight->m_rComp->m_rcModel = m_assetBox->GetAsset("nanosuit");
-	m_mainLight->m_renderNode = new RenderNode(m_mainLight->m_rComp, m_mainLight->m_tComp);
-	m_entityEngine->AddRenderNode(m_mainLight->m_renderNode);
+	//m_mainLight->m_rComp = new RenderComponent(m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj());
+	//m_mainLight->m_rComp->m_rcModel = m_assetBox->GetAsset("cube");
+	//m_mainLight->m_renderNode = new RenderNode(m_mainLight->m_rComp, m_mainLight->m_tComp);
+	//m_entityEngine->AddRenderNode(m_mainLight->m_renderNode);
 
 	//m_testSpinningSquare = new SpinningSquare("test", m_assetBox->GetAsset("nanosuit"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(glm::radians(10.0f), 0, 0));
 	//m_gOList.push_back(m_testSpinningSquare);
+	m_gameSphere = new GameSphere("sphere1", m_assetBox->GetAsset("sphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0.1f, 8, 0), glm::vec3(0, 0, 0),true);
+	m_gOList.push_back(m_gameSphere);
+	m_gameSphere = new GameSphere("sphere2", m_assetBox->GetAsset("sphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 2, 0), glm::vec3(0, 0, 0), false);
+	m_gOList.push_back(m_gameSphere);
+
 	m_woodFloor = new StaticObject("floor", m_assetBox->GetAsset("woodfloor"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, -1, 0), glm::vec3(0, 0, 0));
 	m_gOList.push_back(m_woodFloor);
 }
@@ -250,10 +254,6 @@ void CmainApp::RunMainLoop()
 			it++;
 		}
 
-		glClearColor(0.1f, 0.1f, 0.05f, 0.0f);
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		m_entityEngine->Update(m_GEframeRateController->getDeltaT());
 
 		SDL_GL_SwapWindow(m_Window);
@@ -270,7 +270,7 @@ void CmainApp::Shutdown()
 	//clean game
 	delete m_mainLight;
 	delete m_mainDLight;
-	delete m_testSpinningSquare;
+	delete m_woodFloor;
 	delete m_fpsCam;
 
 	//clean app classes
