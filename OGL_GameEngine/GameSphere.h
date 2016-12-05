@@ -1,3 +1,7 @@
+#pragma once
+#ifndef _GAMESPHERE_H_
+#define _GAMESPHERE_H_
+
 #include "EntityEngine.h"
 #include "GameObject.h"
 #include "Model.h"
@@ -7,13 +11,15 @@ class GameSphere : public GameObject
 public:
 	GameSphere(const std::string gameModelName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot, bool _gravity) : GameObject(gameModelName), m_gameEE(gameEE), gravity(_gravity)
 	{
-		m_transformComp = new TransformComponent(initPos, initRot, false);
+		m_selComp = new SelectedComponent();
+
+		m_transformComp = new TransformComponent(initPos, initRot, !_gravity);
 		m_transformNode = new TransformNode(m_transformComp);
 		gameEE->AddTransformNode(m_transformNode);
 
 		m_rComp = new RenderComponent(_program, viewMat, projMat);
 		m_rComp->m_rcModel = modelAsset;
-		m_renderNode = new RenderNode(m_rComp, m_transformComp);
+		m_renderNode = new RenderNode(m_rComp, m_transformComp, m_selComp);
 		gameEE->AddRenderNode(m_renderNode);
 
 		m_mComp = new MovableComponent();
@@ -50,10 +56,30 @@ public:
 			m_movableNode->movable->m_acceleration += glm::vec3(0, -9.8f, 0);
 	}
 
+	void UpdateSelected(glm::vec3 camarePos, glm::vec3 mouseDir)
+	{
+		if (Math::RaySphereIntersect(mouseDir, camarePos, m_transformComp->m_position + m_scComponent->m_centrePointOffset, m_scComponent->m_radius))
+			m_selComp->m_selected = true;
+		else
+			m_selComp->m_selected = false;
+	}
+
+	void GiveAcceleration(glm::vec3 _acceleration)
+	{
+		m_movableNode->movable->m_acceleration += _acceleration;
+	}
+
+	bool IsBelowYPosition(float y)
+	{
+		return m_transformComp->m_position.y < y;
+	}
+
 private:
 	bool gravity;
 
 private:
+	SelectedComponent* m_selComp;
+
 	SphereCollsionComponent* m_scComponent;
 	SphereCollisionNode* m_scNode;
 
@@ -69,3 +95,5 @@ private:
 	EntityEngine* m_gameEE;
 
 };
+
+#endif

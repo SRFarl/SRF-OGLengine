@@ -1,3 +1,7 @@
+#pragma once
+#ifndef _STATICOBJECT_H_
+#define _STATICOBJECT_H_
+
 #include "EntityEngine.h"
 #include "GameObject.h"
 #include "Model.h"
@@ -7,7 +11,7 @@ class StaticObject : public GameObject
 public:
 	StaticObject(const std::string gameModelName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(gameModelName), m_gameEE(gameEE)
 	{
-		m_transformComp = new TransformComponent(initPos, initRot, false);
+		m_transformComp = new TransformComponent(initPos, initRot, true);
 		m_transformNode = new TransformNode(m_transformComp);
 		gameEE->AddTransformNode(m_transformNode);
 
@@ -43,3 +47,5 @@ private:
 	EntityEngine* m_gameEE;
 
 };
+
+#endif

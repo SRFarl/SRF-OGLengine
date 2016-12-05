@@ -65,7 +65,11 @@ public:
 					pLight += std::to_string(i);
 					glUniform3fv(glGetUniformLocation((*it)->render->m_program, (pLight + "].position").c_str()), 1, glm::value_ptr(m_plList[i]->position));
 					glUniform3fv(glGetUniformLocation((*it)->render->m_program, (pLight + "].ambient").c_str()), 1, glm::value_ptr(m_plList[i]->ambient));
-					glUniform3fv(glGetUniformLocation((*it)->render->m_program, (pLight + "].diffuse").c_str()), 1, glm::value_ptr(m_plList[i]->diffuse));
+					//If it's selected we want to highlight the mesh
+					if ((*it)->selected != NULL && (*it)->selected->m_selected == true)
+						glUniform3fv(glGetUniformLocation((*it)->render->m_program, (pLight + "].diffuse").c_str()), 1, glm::value_ptr(glm::vec3(1.0f, 0.0f, 0.0f)));
+					else
+						glUniform3fv(glGetUniformLocation((*it)->render->m_program, (pLight + "].diffuse").c_str()), 1, glm::value_ptr(m_plList[i]->diffuse));
 					glUniform3fv(glGetUniformLocation((*it)->render->m_program, (pLight + "].specular").c_str()), 1, glm::value_ptr(m_plList[i]->specular));
 					glUniform1f(glGetUniformLocation((*it)->render->m_program, (pLight + "].constant").c_str()), m_plList[i]->constant);
 					glUniform1f(glGetUniformLocation((*it)->render->m_program, (pLight + "].linear").c_str()), m_plList[i]->linear);
@@ -74,7 +78,12 @@ public:
 
 				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.direction"), 1, glm::value_ptr(m_dlList[0]->direction));
 				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.ambient"), 1, glm::value_ptr(m_dlList[0]->ambient));
-				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.diffuse"), 1, glm::value_ptr(m_dlList[0]->diffuse));
+
+				//If it's selected we want to highlight the mesh
+				if ((*it)->selected != NULL && (*it)->selected->m_selected == true)
+					glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.diffuse"), 1, glm::value_ptr(glm::vec3(1.0f, 0.0f, 0.0f)));
+				else
+					glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.diffuse"), 1, glm::value_ptr(m_dlList[0]->diffuse));
 				glUniform3fv(glGetUniformLocation((*it)->render->m_program, "dLight.specular"), 1, glm::value_ptr(m_dlList[0]->specular));
 
 				glUniform1f(glGetUniformLocation((*it)->render->m_program, "material.shininess"), 16.0f);
@@ -391,7 +400,7 @@ public:
 								float scalar = glm::dot(-bNormal, glm::normalize(timestepVelocity));
 								float lengthOfDirectionAfterCollision = (glm::length(timestepVelocity) - magnitudeAlongBeforeCollsion);
 
-								(*it)->transform->m_position = (*it)->transform->m_position + (timestepVelocity + (lengthOfDirectionAfterCollision * bNormal * scalar * 2.0f));
+								(*it)->transform->m_position = (*it)->transform->m_position + ((timestepVelocity) + (lengthOfDirectionAfterCollision * bNormal * scalar * 2.0f));
 								(*it)->movable->m_velocity = ((*it)->movable->m_velocity - (2 * glm::dot((*it)->movable->m_velocity, bNormal) * bNormal)) * (*it2)->sCollision->m_damping;
 								(*it)->movable->m_skipThisFrame = true;
 							}
@@ -439,7 +448,70 @@ public:
 				{
 					if (it2 != it)
 					{
+						//don't check for collision against itself
+						if ((*it2)->transform->m_isStatic || (*it2)->movable == NULL)
+						{
+							glm::vec3 timestepVelocityA = ((*it)->movable->m_velocity + ((*it)->movable->m_acceleration * deltaT)) * deltaT;
 
+							//kinematic-static collision
+							glm::vec3 normal;
+
+							float collisiontime = Math::KinematicAABBStaticAABB(
+								(*it)->transform->m_position + (*it)->aabbCollision->m_minOffset,		//MinA
+								(*it)->transform->m_position + (*it)->aabbCollision->m_maxOffset,		//MinA
+								timestepVelocityA,														//DirectionA
+								(*it2)->transform->m_position + (*it2)->aabbCollision->m_minOffset,		//MinA
+								(*it2)->transform->m_position + (*it2)->aabbCollision->m_maxOffset,		//MinA
+								normal
+								);
+
+							if (collisiontime > 0)
+							{
+								//apply velocity until hit
+								(*it)->transform->m_position += timestepVelocityA * collisiontime;
+
+								//deflect remaining
+								if (abs(normal.x) > 0.0001f)
+									(*it)->movable->m_velocity.x = -((*it)->movable->m_velocity.x + ((*it)->movable->m_acceleration.x * deltaT)) * (*it2)->aabbCollision->m_damping;
+								if (abs(normal.y) > 0.0001f)
+									(*it)->movable->m_velocity.y = -((*it)->movable->m_velocity.y + ((*it)->movable->m_acceleration.y * deltaT)) * (*it2)->aabbCollision->m_damping;
+								if (abs(normal.z) > 0.0001f)
+									(*it)->movable->m_velocity.z = -((*it)->movable->m_velocity.z + ((*it)->movable->m_acceleration.z * deltaT)) * (*it2)->aabbCollision->m_damping;
+
+								glm::vec3 meme = ((*it)->movable->m_velocity) * deltaT;
+
+								(*it)->transform->m_position += ((*it)->movable->m_velocity) * deltaT * (1.0f - collisiontime);
+								(*it)->movable->m_skipThisFrame = true;
+							}
+						}
+						else
+						{
+							//kinematic-kinematic collision
+							glm::vec3 timestepVelocityA = ((*it)->movable->m_velocity + ((*it)->movable->m_acceleration * deltaT)) * deltaT;
+							glm::vec3 timestepVelocityB = ((*it2)->movable->m_velocity + ((*it2)->movable->m_acceleration * deltaT)) * deltaT;
+
+							glm::vec3 resultA;
+							glm::vec3 resultB;
+
+							if (Math::KinematicAABBKinematicAABBCollision(
+								(*it)->transform->m_position + (*it)->aabbCollision->m_midOffset,			//CenterA
+								timestepVelocityA,															//DirectionA
+								(*it)->transform->m_position + (*it)->aabbCollision->m_minOffset,			//MinA
+								(*it)->transform->m_position + (*it)->aabbCollision->m_maxOffset,			//MaxA
+								(*it)->movable->m_mass,														//MassA
+								(*it2)->transform->m_position + (*it2)->aabbCollision->m_midOffset,			//CenterB
+								timestepVelocityB,															//DirectionB
+								(*it2)->transform->m_position + (*it2)->aabbCollision->m_minOffset,			//MinA
+								(*it2)->transform->m_position + (*it2)->aabbCollision->m_maxOffset,			//MaxA
+								(*it2)->movable->m_mass,													//MassB
+								resultA,																	//ResultA
+								resultB																		//ResultB
+								))
+							{
+								(*it)->movable->m_velocity = resultA / deltaT;
+								(*it2)->movable->m_velocity = resultB / deltaT;
+							}
+						}
 					}
 					it2++;
 				}

@@ -1,3 +1,7 @@
+#pragma once
+#ifndef _SPINNINGSQAURE_H_
+#define _SPINNINGSQAURE_H_
+
 #include "EntityEngine.h"
 #include "GameObject.h"
 #include "Model.h"
@@ -5,9 +9,9 @@
 class SpinningSquare : public GameObject
 {
 public:
-	SpinningSquare(const std::string gameModelName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(gameModelName), m_gameEE(gameEE)
+	SpinningSquare(const std::string gameModelName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot, float _gravity) : GameObject(gameModelName), m_gameEE(gameEE), gravity(_gravity)
 	{
-		m_transformComp = new TransformComponent(initPos, initRot, false);
+		m_transformComp = new TransformComponent(initPos, initRot, !_gravity);
 		m_transformNode = new TransformNode(m_transformComp);
 		gameEE->AddTransformNode(m_transformNode);
 
@@ -25,7 +29,9 @@ public:
 		glm::vec3 aabbmid;
 		modelAsset->BuildAABB(aabbmin, aabbmax, aabbmid);
 
-		m_aabbComp = new AABBCollisionComponent(aabbmin, aabbmax, aabbmid, 0.9f);
+		m_aabbComp = new AABBCollisionComponent(aabbmin, aabbmax, aabbmid, 0.7f);
+		m_aabbNode = new AABBCollisionNode(m_aabbComp, m_transformComp, m_mComp);
+		gameEE->AddAABBCollisionNode(m_aabbNode);
 	}
 
 	~SpinningSquare()
@@ -49,10 +55,13 @@ public:
 
 	void Update(float deltaT)
 	{
-		m_transformComp->m_rotAngles.y += glm::radians(0.1f);
+		if (gravity)
+			m_movableNode->movable->m_acceleration += glm::vec3(0, -9.8f, 0);
 	}
 
 private:
+	bool gravity;
+
 	AABBCollisionComponent* m_aabbComp;
 	AABBCollisionNode* m_aabbNode;
 
@@ -68,3 +77,5 @@ private:
 	EntityEngine* m_gameEE;
 
 };
+
+#endif

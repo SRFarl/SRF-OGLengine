@@ -3,14 +3,14 @@
 //////////////////////////////////////////////////////////////////////////
 //Camera Constructor
 //////////////////////////////////////////////////////////////////////////
-FPSCamera::FPSCamera(float sensitivity) : m_cameraSpeed(3.0f), m_sensitivity(sensitivity)
+FPSCamera::FPSCamera(glm::vec3 initPos, glm::vec3 initRotDir, float sensitivity) : m_cameraSpeed(3.0f), m_sensitivity(sensitivity)
 {
-	eye = glm::vec3(0,0,-3.0f);	//position of camera
+	eye = initPos;	//position of camera
 	centre = glm::vec3(0,0,1);	//viewing direction when added to the eye
 	up = glm::vec3(0,1,0);		//up direction vector
 
 	//initialise variables
-	rotationAngles = glm::vec3(90,0,0);
+	rotationAngles = initRotDir;
 	m_lmouseX = WINWIDTH/2;
 	m_lmouseY = WINHEIGHT/2;
 
@@ -23,13 +23,16 @@ FPSCamera::FPSCamera(float sensitivity) : m_cameraSpeed(3.0f), m_sensitivity(sen
 //////////////////////////////////////////////////////////////////////////
 //Update for the cameras movement and direction
 //////////////////////////////////////////////////////////////////////////
-void FPSCamera::UpdateCamera(float deltaTs, bool forward, bool backward, bool left, bool right, GLfloat mouseXRel, GLfloat mouseYRel)
+void FPSCamera::UpdateCamera(float deltaTs, bool forward, bool backward, bool left, bool right, bool leftMouseDown, GLfloat mouseXRel, GLfloat mouseYRel)
 {
-	mouseXRel *= (m_sensitivity * deltaTs);
-	mouseYRel *= (m_sensitivity * deltaTs);
+	if (leftMouseDown)
+	{
+		mouseXRel *= (m_sensitivity * deltaTs);
+		mouseYRel *= (m_sensitivity * deltaTs);
 
-	rotationAngles.x += mouseXRel;	//yaw
-	rotationAngles.y -= mouseYRel;	//pitch
+		rotationAngles.x += mouseXRel;	//yaw
+		rotationAngles.y -= mouseYRel;	//pitch
+	}
 
 	if (rotationAngles.y > 89.0f)
 		rotationAngles.y = 89.0f;
@@ -80,8 +83,6 @@ glm::vec3 FPSCamera::CreateMouseRayFromCamera(float mouseXPos, float mouseYPos)
 	float x = (2.0f * mouseXPos) / viewport[2] - 1.0f;
 	float y = 1.0f - (2.0f * mouseYPos) / viewport[3];
 	float z = -1.0f;
-
-	std::cout << x << ", " << y << ", " << WINHEIGHT << std::endl;
 
 	//turn to 4d homogenous clip coords
 	glm::vec4 tempRay(x, y, z, 1.0f);

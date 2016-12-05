@@ -76,6 +76,35 @@ namespace Math
 		return glm::normalize(glm::cross(v0v1, v0v2));
 	}
 
+	float VectorSum(glm::vec3 _in)
+	{
+		return _in.x + _in.y + _in.z;
+	}
+
+	bool RaySphereIntersect(glm::vec3 raydir, glm::vec3 rayorig, glm::vec3 pos,
+		float rad)
+	{
+		float a = VectorSum(raydir*raydir);
+		float b = VectorSum(raydir * (2.0f * (rayorig - pos)));
+		float c = VectorSum(pos*pos) + VectorSum(rayorig*rayorig) - 2.0f*VectorSum(rayorig*pos) - rad*rad;
+		float D = b*b + (-4.0f)*a*c;
+
+		// If ray can not intersect then stop
+		if (D < 0)
+			return false;
+		D = sqrtf(D);
+
+		// Ray can intersect the sphere, solve the closer hitpoint
+		float t = (-0.5f)*(b + D) / a;
+		if (t > 0.0f)
+		{
+			return true;
+		}
+		else
+			return false;
+	}
+
+
 	float KinematicSphereStaticSphereCollision(glm::vec3 centerA, glm::vec3 DirectionA, float radiusA, glm::vec3 centerB, float radiusB)
 	{
 		// Find C, the vector from the center of the moving 
@@ -149,7 +178,7 @@ namespace Math
 	{
 		//colision
 		glm::vec3 AB = (centerA + DirectionA) - (centerB + DirectionB);
-		if (glm::length(AB) > (radiusA + radiusB))
+		if (glm::length(AB) >= (radiusA + radiusB))
 		{
 			return false;
 		}
@@ -171,6 +200,181 @@ namespace Math
 		return true;
 	}
 
+	bool AABBIntersection(glm::vec3 minA, glm::vec3 maxA, glm::vec3 minB, glm::vec3 maxB)
+	{
+		return (minA.x <= maxB.x && maxA.x >= minB.x) &&
+			(minA.y <= maxB.y && maxA.y >= minB.y) &&
+			(minA.z <= maxB.z && maxA.z >= minB.z);
+	}
+
+	float KinematicAABBStaticAABB(glm::vec3 minA, glm::vec3 maxA, glm::vec3 DirectionA, glm::vec3 minB, glm::vec3 maxB, glm::vec3 &normal)
+	{
+		//http://www.gamedev.net/page/resources/_/technical/game-programming/swept-aabb-collision-detection-and-response-r3084
+
+		//early out intersection test
+		if (!AABBIntersection(minA + DirectionA, maxA + DirectionA, minB, maxB))
+			return -1.0f;
+
+		//find distance and time it takes to reach a collision
+		glm::vec3 InvEntry; //closest edges distance
+		glm::vec3 InvExit;	//distance to furthest side of the object
+
+		if (DirectionA.x > 0)
+		{
+			InvEntry.x = minB.x - maxA.x;
+			InvExit.x = maxB.x - minA.x;
+		}
+		else
+		{
+			InvEntry.x = minA.x - maxB.x;
+			InvExit.x = maxA.x - minB.x;
+		}
+		if (DirectionA.y > 0)
+		{
+			InvEntry.y = minB.y - maxA.y;
+			InvExit.y = maxB.y - minA.y;
+		}
+		else
+		{
+			InvEntry.y = minA.y - maxB.y;
+			InvExit.y = maxA.y - minB.y;
+		}
+		if (DirectionA.z > 0)
+		{
+			InvEntry.z = minB.z - maxA.z;
+			InvExit.z = maxB.z - minA.z;
+		}
+		else
+		{
+			InvEntry.z = minA.z - maxB.z;
+			InvExit.z = maxA.z - minB.z;
+		}
+
+		// find time of collision and time of leaving for each axis (if statement is to prevent divide by zero)
+		glm::vec3 entry;
+		glm::vec3 exit;
+
+		if (DirectionA.x == 0.0f)
+		{
+			entry.x = -std::numeric_limits<float>::infinity();
+			exit.x = std::numeric_limits<float>::infinity();
+		}
+		else
+		{
+			entry.x = InvEntry.x / fabs(DirectionA.x);
+			exit.x = InvExit.x / fabs(DirectionA.x);
+		}
+
+		if (DirectionA.y == 0.0f)
+		{
+			entry.y = -std::numeric_limits<float>::infinity();
+			exit.y = std::numeric_limits<float>::infinity();
+		}
+		else
+		{
+			entry.y = InvEntry.y / fabs(DirectionA.y);
+			exit.y = InvExit.y / fabs(DirectionA.y);
+		}
+
+		if (DirectionA.z == 0.0f)
+		{
+			entry.z = -std::numeric_limits<float>::infinity();
+			exit.z = std::numeric_limits<float>::infinity();
+		}
+		else
+		{
+			entry.z = InvEntry.y / fabs(DirectionA.z);
+			exit.z = InvExit.y / fabs(DirectionA.z);
+		}
+
+		// find the earliest/latest times of collision
+		float entryTime = std::max(std::max(entry.x, entry.y), entry.z);
+		float exitTime = std::max(std::max(exit.x, exit.y), exit.z);
+
+		// second intersection test
+		if (entryTime > exitTime || entry.x < 0.0f && entry.y < 0.0f && entry.z < 0.0f || entry.x > 1.0f || entry.y > 1.0f || entry.z > 1.0f)
+		{
+			return -1.0f;
+		}
+		else // if there was a collision
+		{
+			// calculate normal of collided surface
+			if (entry.x > entry.y && entry.x > entry.z)
+			{
+				if (InvEntry.x > 0.0f)
+				{
+					normal.x = 1.0f;
+					normal.y = 0.0f;
+					normal.z = 0.0f;
+				}
+				else
+				{
+					normal.x = -1.0f;
+					normal.y = 0.0f;
+					normal.z = 0.0f;
+				}
+			}
+			else if (entry.y > entry.x && entry.y > entry.z)
+			{
+				if (InvEntry.y > 0.0f)
+				{
+					normal.x = 0.0f;
+					normal.y = 1.0f;
+					normal.z = 0.0f;
+				}
+				else
+				{
+					normal.x = 0.0f;
+					normal.y = -1.0f;
+					normal.z = 0.0f;
+				}
+			}
+			else
+			{
+				if (InvEntry.z > 0.0f)
+				{
+					normal.x = 0.0f;
+					normal.y = 0.0f;
+					normal.z = 1.0f;
+				}
+				else
+				{
+					normal.x = 0.0f;
+					normal.y = 0.0f;
+					normal.z = -1.0f;
+				}
+			}
+			// return the time of collision
+			return entryTime;
+		}
+
+		return 0;
+	}
+
+	float KinematicAABBKinematicAABBCollision(glm::vec3 centerA, glm::vec3 DirectionA, glm::vec3 minA, glm::vec3 maxA, float massA, glm::vec3 centerB, glm::vec3 DirectionB, glm::vec3 minB, glm::vec3 maxB, float massB, glm::vec3 &resultA, glm::vec3 &resultB)
+	{
+		//colision
+		if (!AABBIntersection(minA + DirectionA, maxA + DirectionA, minB + DirectionB, maxB + DirectionB))
+		{
+			return false;
+		}
+
+		//bounce http://www.gamasutra.com/view/feature/131424/pool_hall_lessons_fast_accurate_.php?page=2
+		glm::vec3 n = glm::normalize(centerA - centerB);
+
+		float a1 = glm::dot(DirectionA, n);
+		float a2 = glm::dot(DirectionB, n);
+
+		float optimizedP = (2.0 * (a1 - a2)) / (massA + massB);
+
+		glm::vec3 v1b = DirectionA - optimizedP * massB * n;
+		glm::vec3 v2b = DirectionB + optimizedP * massA * n;
+
+		resultA = v1b;
+		resultB = v2b;
+
+		return true;
+	}
 }
 
 #endif

@@ -8,6 +8,7 @@ struct SDLKey
 {
 	SDL_Keycode keyEnum;
 	bool pressed;
+	bool lifted;
 };
 
 class SDLInputHandler
@@ -18,6 +19,7 @@ public:
 
 	void UpdateSDLInputs();
 	bool getKeyPressed(SDL_Keycode key);
+	bool getKeyLifted(SDL_Keycode key);
 	inline float getMouseLDown() { return m_mouseLDown; };
 	inline float getMouseRDown() { return m_mouseRDown; };
 	inline float getMouseLClicked() { return m_mouseLClicked; };
@@ -51,6 +53,7 @@ SDLInputHandler::SDLInputHandler(SDL_Keycode keyList[], int keyListSize) : m_bqu
 		SDLKey temp;
 		temp.keyEnum = keyList[i];
 		temp.pressed = false;
+		temp.lifted = false;
 		
 		m_liskeyArray.push_back(temp);
 	}
@@ -75,13 +78,33 @@ bool SDLInputHandler::getKeyPressed(SDL_Keycode key)
 	return false;
 }
 
+bool SDLInputHandler::getKeyLifted(SDL_Keycode key)
+{
+	for (std::list<SDLKey>::iterator it = m_liskeyArray.begin(); it != m_liskeyArray.end(); it++)
+	{
+		if (it->keyEnum == key)
+		{
+			return it->lifted;
+		}
+	}
+
+	//Safety net - Will only be used if the key arg isn't in the keyArray
+	return false;
+}
+
 void SDLInputHandler::UpdateSDLInputs()
 {
 	m_xMoused = 0;
 	m_yMoused = 0;
 
+	//reset lifted/clicked
 	m_mouseLClicked = false;
 	m_mouseRClicked = false;
+
+	for (std::list<SDLKey>::iterator it = m_liskeyArray.begin(); it != m_liskeyArray.end(); it++)
+	{
+		it->lifted = false;
+	}
 
 	while (SDL_PollEvent(&m_theEvent) != 0)
 	{
@@ -98,7 +121,10 @@ void SDLInputHandler::UpdateSDLInputs()
 				if (m_theEvent.type == SDL_KEYDOWN)
 					it->pressed = true;
 				else if (m_theEvent.type == SDL_KEYUP)
+				{
+					it->lifted = true;
 					it->pressed = false;
+				}
 
 				continue;
 			}

@@ -5,10 +5,11 @@ StateManager::~StateManager()
 {
 	for (int i = 0; i < m_states.size(); i++)
 	{
-		State *temp = m_states[i];
-		m_states.erase(m_states.begin() + i);
-		delete temp; //delete all of the game states at the end for clear up
+		m_states[i]->Shutdown();
+		delete m_states[i];
 	}
+
+	m_states.clear();
 }
 
 void StateManager::AddState(State* _state)
@@ -19,11 +20,10 @@ void StateManager::AddState(State* _state)
 
 void StateManager::ChangeState(State* _state)
 {
-	for (int i = 0; i < m_states.size(); i++)
+	for (int i = 0; i < m_states.size();)
 	{
-		State *temp = m_states[i];
-		m_states.erase(m_states.begin() + i);
-		delete temp;
+		m_states[i]->Shutdown();
+		delete m_states[i];
 	} //get rid of all other states and then add the new one passes
 
 	m_states.clear();
@@ -32,6 +32,7 @@ void StateManager::ChangeState(State* _state)
 
 void StateManager::RemoveLastState()
 {
+	m_states.back()->Shutdown();
 	delete m_states.back();
 	m_states.pop_back();
 }

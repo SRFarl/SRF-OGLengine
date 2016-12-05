@@ -5,10 +5,12 @@
 class RenderNode
 {
 public:
-	RenderNode(RenderComponent* _render, TransformComponent* _transform) : render(_render), transform(_transform){};
+	RenderNode(RenderComponent* _render, TransformComponent* _transform) : render(_render), transform(_transform), selected(NULL) {};
+	RenderNode(RenderComponent* _render, TransformComponent* _transform, SelectedComponent* _selected) : render(_render), transform(_transform), selected(_selected) {};
 
 	RenderComponent* render;
 	TransformComponent* transform;
+	SelectedComponent* selected;
 };
 
 class MovableNode

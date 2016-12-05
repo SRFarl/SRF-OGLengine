@@ -2,6 +2,7 @@
 #include "SDLFrameRateController.h"
 #include "StateManager.h"
 #include "GameState.h"
+#include "PauseState.h"
 
 class CmainApp
 {
@@ -125,12 +126,12 @@ bool CmainApp::BInit()
 	std::cout << "INFO: OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 	std::cout << "INFO: OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
-	SDL_SetRelativeMouseMode(SDL_TRUE);
+	//SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	glEnable(GL_DEPTH_TEST);
 
 	//init input handler
-	SDL_Keycode tempKeys[4] = { SDLK_w, SDLK_a, SDLK_s, SDLK_d };
+	SDL_Keycode tempKeys[6] = { SDLK_w, SDLK_a, SDLK_s, SDLK_d, SDLK_p, SDLK_f };
 	m_GEinput = new SDLInputHandler(tempKeys, sizeof(tempKeys) / sizeof(tempKeys[0]));
 
 	//frame rate controller

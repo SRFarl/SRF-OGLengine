@@ -66,6 +66,15 @@ public:
 	bool m_isStatic;
 };
 
+class SelectedComponent
+{
+public:
+	SelectedComponent() :
+		m_selected(false)
+	{}
+	bool m_selected;
+};
+
 class SphereCollsionComponent
 {
 public:

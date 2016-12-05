@@ -22,9 +22,9 @@ class FPSCamera
 		GLfloat m_sensitivity;
 
 	public:
-		FPSCamera(float sensitivity);
+		FPSCamera(glm::vec3 initPos, glm::vec3 initDir, float sensitivity);
 		
-		void UpdateCamera(float deltaTs, bool forward, bool backward, bool left, bool right, GLfloat mouseXRel, GLfloat mouseYRel);
+		void UpdateCamera(float deltaTs, bool forward, bool backward, bool left, bool right, bool leftMouseDown, GLfloat mouseXRel, GLfloat mouseYRel);
 		
 		glm::vec3 CreateMouseRayFromCamera(float mouseXPos, float mouseYPos);
 		inline glm::vec3 GetPos() { return eye; }
