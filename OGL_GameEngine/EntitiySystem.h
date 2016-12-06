@@ -15,10 +15,10 @@ public:
 class RenderSystem : public ISystem
 {
 private:
-	std::vector<FPSCamera*> m_cameraList;
-	std::vector<RenderNode*> m_rnList;
-	std::vector<PointLight*> m_plList;
-	std::vector<DirectionalLight*> m_dlList;
+	std::vector<FPSCamera*> m_cameraList;		//list of cameras
+	std::vector<RenderNode*> m_rnList;			//list of render nodes
+	std::vector<PointLight*> m_plList;			//list of point lights
+	std::vector<DirectionalLight*> m_dlList;	//list of directional lights
 
 public:
 
@@ -30,7 +30,7 @@ public:
 
 	void RemoveNode(RenderNode* in)
 	{
-		//removes a render node to the system
+		//removes a render node from the system
 		for (std::vector<RenderNode*>::iterator it = m_rnList.begin(); it != m_rnList.end();)
 		{
 			if ((*it) == in)
@@ -46,14 +46,14 @@ public:
 	void Update(float deltaT)
 	{
 		//The render loop
-		//Clear gl
+		//Clear
 		glClearColor(0.1f, 0.1f, 0.05f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Render each render node
 		for (std::vector<RenderNode*>::iterator it = m_rnList.begin(); it != m_rnList.end();)
 		{
-			//render every mesh of the node
+			//render every mesh of the model
 			for (std::vector<Mesh>::iterator it2 = (*it)->render->m_rcModel->m_meshes.begin(); it2 != (*it)->render->m_rcModel->m_meshes.end();)
 			{
 				//set the gl program
@@ -435,9 +435,12 @@ public:
 								float lengthOfDirectionAfterCollision = (glm::length(timestepVelocity) - magnitudeAlongBeforeCollsion);
 
 								//set the position and velocity
-								(*it)->transform->m_position = (*it)->transform->m_position + ((timestepVelocity) + (lengthOfDirectionAfterCollision * bNormal * scalar * 2.0f));
+								//it work better if we don't apply the position and just leave it to transform system to apply velocity.
+								//we zero acceleration because it can cause objects to fall through each other
+								//(*it)->transform->m_position = (*it)->transform->m_position + ((timestepVelocity) + (lengthOfDirectionAfterCollision * bNormal * scalar * 2.0f));
 								(*it)->movable->m_velocity = ((*it)->movable->m_velocity - (2 * glm::dot((*it)->movable->m_velocity, bNormal) * bNormal)) * (*it2)->sCollision->m_damping;
-								(*it)->movable->m_skipThisFrame = true;
+								(*it)->movable->m_acceleration = glm::vec3(0);
+								//(*it)->movable->m_skipThisFrame = true;
 							}
 						}
 						else
@@ -463,6 +466,7 @@ public:
 								resultB																		//ResultB
 								))
 							{
+								//apply resulting velocity
 								(*it)->movable->m_velocity = resultA / deltaT;
 								(*it2)->movable->m_velocity = resultB / deltaT;
 							}

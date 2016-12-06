@@ -27,7 +27,7 @@ public:
 		m_movableNode = new MovableNode(m_mComp, m_transformComp);
 		gameEE->AddMovableNode(m_movableNode);
 
-		m_scComponent = new SphereCollsionComponent(glm::vec3(0.0f), 1.0f, 0.95f);
+		m_scComponent = new SphereCollsionComponent(glm::vec3(0.0f), 1.0f, 0.80f);
 		m_scNode = new SphereCollisionNode(m_scComponent, m_transformComp, m_mComp);
 		gameEE->AddSphereCollisionNode(m_scNode);
 	}
