@@ -13,6 +13,9 @@ public:
 		m_gameModelName(gameModelName)
 	{}
 
+	~GameObject()
+	{}
+
 	virtual void Update(float deltaT) = 0;
 
 	const std::string getName() { return m_gameModelName; }

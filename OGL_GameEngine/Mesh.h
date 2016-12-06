@@ -79,35 +79,40 @@ private:
 	{
 		ComputeTangents();
 
+		//intialise the opengl buffers
 		glGenVertexArrays(1, &m_VAO);
 		glGenBuffers(1, &m_VBO);
 		glGenBuffers(1, &m_EBO);
 
+		//vertex
 		glBindVertexArray(m_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
 		glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex),
 			&m_vertices[0], GL_STATIC_DRAW);
 
+		//element
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(GLuint),
 			&m_indices[0], GL_STATIC_DRAW);
 
-		// Vertex Positions
+		//vertex Positions
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 			(GLvoid*)0);
-		// Vertex Normals
+		//vertex Normals
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 			(GLvoid*)offsetof(Vertex, Normal));
-		// Vertex Texture Coords
+		//vertex Texture Coords
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 			(GLvoid*)offsetof(Vertex, TexCoords));
+		//vertex tangent
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 			(GLvoid*)offsetof(Vertex, Tangent));
+		//vertex bitangent
 		glEnableVertexAttribArray(4);
 		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 			(GLvoid*)offsetof(Vertex, BiTangent));
@@ -118,6 +123,8 @@ private:
 
 	void ComputeTangents()
 	{
+		//computes tangent and bi-tangents of the mesh's triangles
+		//used for normal mapping
 		for (int i = 0; i < m_vertices.size(); i += 3)
 		{
 			glm::vec3 &v0 = m_vertices[i].Position;

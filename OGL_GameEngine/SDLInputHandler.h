@@ -47,6 +47,7 @@ SDLInputHandler::SDLInputHandler(SDL_Keycode keyList[], int keyListSize) : m_bqu
 	m_mouseLDown(false), m_mouseRDown(false),
 	m_mouseLClicked(false), m_mouseRClicked(false)
 {
+	//initialise the SDLKey list
 	for (int i = 0; i < keyListSize; i++)
 	{
 		//create a SDLKey
@@ -61,39 +62,45 @@ SDLInputHandler::SDLInputHandler(SDL_Keycode keyList[], int keyListSize) : m_bqu
 
 SDLInputHandler::~SDLInputHandler()
 {
+	//empty the SDLKey array
 	m_liskeyArray.clear();
 }
 
 bool SDLInputHandler::getKeyPressed(SDL_Keycode key)
 {
+	//returns a boolean if a key is registered as pressed
 	for (std::list<SDLKey>::iterator it = m_liskeyArray.begin(); it != m_liskeyArray.end(); it++)
 	{
+		//is this the key requested
 		if (it->keyEnum == key)
 		{
 			return it->pressed;
 		}
 	}
 
-	//Safety net - Will only be used if the key arg isn't in the keyArray
+	//Safety net - Will only be used if the key argument isn't in the keyArray
 	return false;
 }
 
 bool SDLInputHandler::getKeyLifted(SDL_Keycode key)
 {
+	//returns a boolean if a key is lifted, will only last for 1 frame
 	for (std::list<SDLKey>::iterator it = m_liskeyArray.begin(); it != m_liskeyArray.end(); it++)
 	{
+		//is this the key requested
 		if (it->keyEnum == key)
 		{
 			return it->lifted;
 		}
 	}
 
-	//Safety net - Will only be used if the key arg isn't in the keyArray
+	//Safety net - Will only be used if the key argument isn't in the keyArray
 	return false;
 }
 
 void SDLInputHandler::UpdateSDLInputs()
 {
+	//updates all the inputs and stores the information
 	m_xMoused = 0;
 	m_yMoused = 0;
 
@@ -106,18 +113,23 @@ void SDLInputHandler::UpdateSDLInputs()
 		it->lifted = false;
 	}
 
+	
 	while (SDL_PollEvent(&m_theEvent) != 0)
 	{
+		//poll over all the events
 		if (m_theEvent.type == SDL_QUIT)
 		{
+			//quit was pressed
 			m_bquitPressed = true;
 			return;
 		}
 
 		for (std::list<SDLKey>::iterator it = m_liskeyArray.begin(); it != m_liskeyArray.end(); it++)
 		{
+			//loop over all the keys we need to look out for
 			if (m_theEvent.key.keysym.sym == (it)->keyEnum)
 			{
+				//this key has had an action
 				if (m_theEvent.type == SDL_KEYDOWN)
 					it->pressed = true;
 				else if (m_theEvent.type == SDL_KEYUP)
@@ -132,6 +144,7 @@ void SDLInputHandler::UpdateSDLInputs()
 
 		if (m_theEvent.type == SDL_MOUSEMOTION)
 		{
+			//there has benn mouse motion
 			m_xMoused = m_theEvent.motion.xrel;
 			m_yMoused = m_theEvent.motion.yrel;
 
@@ -151,13 +164,16 @@ void SDLInputHandler::UpdateSDLInputs()
 
 		if (m_theEvent.type == SDL_MOUSEBUTTONDOWN)
 		{
+			//mouse button has been pressed
 			if (m_theEvent.button.button == SDL_BUTTON_LEFT)
 			{
+				//left mouse button was pressed
 				m_mouseLDown = true;
 				m_mouseLClicked = true;
 			}
 			else if (m_theEvent.button.button == SDL_BUTTON_RIGHT)
 			{
+				//right mouse button was pressed
 				m_mouseRDown = true;
 				m_mouseRClicked = true;
 			}
@@ -165,12 +181,15 @@ void SDLInputHandler::UpdateSDLInputs()
 
 		if (m_theEvent.type == SDL_MOUSEBUTTONUP)
 		{
+			//mouse button was lifted
 			if (m_theEvent.button.button == SDL_BUTTON_LEFT)
 			{
+				//left mouse button was lifted
 				m_mouseLDown = false;
 			}
 			else if (m_theEvent.button.button == SDL_BUTTON_RIGHT)
 			{
+				//right mouse button was lifted
 				m_mouseRDown = false;
 			}
 		}

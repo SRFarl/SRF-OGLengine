@@ -9,17 +9,20 @@ public:
 	AssetBox(){};
 	~AssetBox()
 	{
+		//clean asset box
 		m_assetList.clear();
 	}
 
 	void LoadAsset(std::string _assetName, GLchar* modelPath)
 	{
+		//create a model and then add it to the box
 		Model temp(modelPath, _assetName);
 		m_assetList.push_back(temp);
 	}
 
 	void RemoveAsset(const std::string _assetName)
 	{
+		//remove an asset from the box
 		for (std::vector<Model>::iterator it = m_assetList.begin(); it != m_assetList.end();)
 		{
 			if (it->GetName() == _assetName)
@@ -34,6 +37,7 @@ public:
 
 	Model* GetAsset(std::string _assetName)
 	{
+		//return an asset found with a name tag
 		for (std::vector<Model>::iterator it = m_assetList.begin(); it != m_assetList.end();)
 		{
 			if (it->GetName() == _assetName)

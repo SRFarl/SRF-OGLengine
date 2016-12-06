@@ -37,6 +37,7 @@ public:
 
 	~Model()
 	{
+		//empty the meshes array
 		m_meshes.clear();
 	}
 
@@ -101,6 +102,7 @@ private:
 
 	void LoadModel(std::string path)
 	{
+		//load the model with assimp
 		Assimp::Importer import;
 		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
@@ -188,6 +190,7 @@ private:
 	};
 	std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 	{
+		//find the textures associated with the type and give it a name
 		std::vector<Texture> textures;
 		for (GLuint i = 0; i < mat->GetTextureCount(type); i++)
 		{

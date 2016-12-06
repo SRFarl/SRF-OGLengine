@@ -2,6 +2,8 @@
 #define _ENTITY_ENGINE_H_
 #include "EntitiySystem.h"
 
+//the engine updates the systems
+
 class EntityEngine
 {
 private:

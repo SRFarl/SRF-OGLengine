@@ -42,6 +42,7 @@ CmainApp::CmainApp(int argc, char *argv[])
 	, m_Glcontext(NULL)
 	, m_fCameraSens(16.0f)
 {
+	//go over the program arguments and assign anything
 	for (int i = 1; i < argc; i++)
 	{
 		if (!_stricmp(argv[i], "-gldebug"))
@@ -58,7 +59,6 @@ CmainApp::CmainApp(int argc, char *argv[])
 			i++;
 		}
 	}
-
 }
 
 CmainApp::~CmainApp()
@@ -67,35 +67,31 @@ CmainApp::~CmainApp()
 
 bool CmainApp::BInit()
 {
+	//init SDL
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 		return false;
 
-	// This is how we set the context profile
-	// We need to do this through SDL, so that it can set up the OpenGL drawing context that matches this
-	// (of course in reality we have no guarantee this will be available and should provide fall back methods if it's not!)
-	// Anyway, we basically first say which version of OpenGL we want to use
-	// So let's say 4.3:
-	// Major version number (4):
+	//set opengl version to 4.3
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	// Minor version number (3):
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-	// Then we say whether we want the core profile or the compatibility profile
-	// Flag options are either: SDL_GL_CONTEXT_PROFILE_CORE   or   SDL_GL_CONTEXT_PROFILE_COMPATIBILITY
-	// We'll go for the core profile
-	// This means we are using the latest version and cannot use the deprecated functions
+
+	//then we say whether we want the core profile or the compatibility profile
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
 	if (m_bDebugOpenGL)
+		//debug option
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
+	//create window
 	m_Window = SDL_CreateWindow("RENAME ME", WINPOSX, WINPOSY, WINWIDTH, WINHEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 	if (m_Window == NULL)
 	{
 		printf("%s - Window could not be created! SDL Error: %s\n", __FUNCTION__, SDL_GetError());
 		return false;
 	}
+	//create gl context
 	m_Glcontext = SDL_GL_CreateContext(m_Window);
 	if (m_Glcontext == NULL)
 	{
@@ -103,6 +99,7 @@ bool CmainApp::BInit()
 		return false;
 	}
 
+	//check for errors
 	glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
@@ -113,19 +110,21 @@ bool CmainApp::BInit()
 	}
 	glGetError(); // to clear the error caused deep in GLEW
 
+	//vsync
 	if (SDL_GL_SetSwapInterval(m_bVsync ? 1 : 0) < 0)
 	{
 		printf("%s - Warning: Unable to set VSync! SDL Error: %s\n", __FUNCTION__, SDL_GetError());
 		return false;
 	}
 
+	//debug info
 	std::cout << "INFO: Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
-
 	std::cout << "INFO: OpenGL Vendor: " << glGetString(GL_VENDOR) << std::endl;
 	std::cout << "INFO: OpenGL Renderer: " << glGetString(GL_RENDERER) << std::endl;
 	std::cout << "INFO: OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 	std::cout << "INFO: OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-
+	
+	//set the mouse to be locked in the window
 	//SDL_SetRelativeMouseMode(SDL_TRUE);
 
 	glEnable(GL_DEPTH_TEST);
@@ -146,11 +145,13 @@ bool CmainApp::BInit()
 
 void CmainApp::DebugCalls()
 {
+	//all the debug calls are called from here
 	m_GEframeRateController->DisplayDebugInfo();
 }
 
 bool CmainApp::HandleInput()
 {
+	//handle inputs and return if quit was pressed
 	m_GEinput->UpdateSDLInputs();
 
 	return m_GEinput->getQuitPressed();
@@ -160,8 +161,10 @@ void CmainApp::RunMainLoop()
 {
 	while (1)
 	{
+		//start the frame timer
 		m_GEframeRateController->StartFrame();
 
+		//handle inputs
 		if (HandleInput() || m_stateManager->CheckIfEmpty())
 			return;
 
@@ -171,15 +174,19 @@ void CmainApp::RunMainLoop()
 		//update states
 		m_stateManager->Update(m_GEframeRateController->getDeltaT());
 
+		//debug calls
 		if (m_bDebugGame)
 			DebugCalls();
 
+		//delay for frame
 		m_GEframeRateController->DelayForFrameRate();
 	}
 }
 
 void CmainApp::Shutdown()
 {
+	//managers
+	delete m_GEinput;
 	delete m_GEframeRateController;
 	delete m_stateManager;
 
@@ -191,17 +198,20 @@ void CmainApp::Shutdown()
 
 int main(int argc, char *argv[])
 {
+	//initalise
 	CmainApp *pCmainApp = new CmainApp(argc, argv);
-
 	if (!pCmainApp->BInit())
 	{
 		pCmainApp->Shutdown();
 		return 1;
 	}
 
+	//run
 	pCmainApp->RunMainLoop();
 
+	//shutdown
 	pCmainApp->Shutdown();
+	delete pCmainApp;
 
 	return 0;
 }

@@ -3,6 +3,9 @@
 #include "Headers.h"
 #include "Model.h"
 
+//components are variables containers
+//no logic occurs in a component
+
 class RenderComponent
 {
 public:

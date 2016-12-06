@@ -17,7 +17,6 @@ public:
 
 	bool CheckIfEmpty();
 
-	bool Init();
 	void Update(float deltaT);
 
 	

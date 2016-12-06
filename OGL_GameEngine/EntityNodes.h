@@ -2,6 +2,9 @@
 #define _ENTITY_NODES_H_
 #include "EntityComponents.h"
 
+//nodes hold components only
+//no logic occurs in a node
+
 class RenderNode
 {
 public:

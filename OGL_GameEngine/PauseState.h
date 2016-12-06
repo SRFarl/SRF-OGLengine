@@ -22,10 +22,12 @@ public:
 private:
 	bool BInitShaders();
 
-private: //GL
+private: 
+	//GL
 	Shader *m_sceneShader;
 
 private:
+	//managers
 	AssetBox *m_assetBox;
 	EntityEngine *m_entityEngine;
 
@@ -44,21 +46,19 @@ PauseState::PauseState(StateManager* _stateManager, SDL_Window* _window, SDLInpu
 
 }
 
-PauseState::~PauseState()
-{
-	Shutdown();
-}
-
 bool PauseState::Init()
 {
+	//initialise shaders
 	if (!BInitShaders())
 	{
 		return false;
 	}
 
+	//create managers
 	m_assetBox = new AssetBox();
 	m_entityEngine = new EntityEngine();
 
+	//initalise lights
 	m_mainLight = new PointLight;
 	m_mainLight->position = glm::vec3(0.0f, 0.5f, 0.0f);
 	m_mainLight->diffuse = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -67,6 +67,7 @@ bool PauseState::Init()
 	m_mainLight->constant = 1.0f;
 	m_mainLight->linear = 0.09f;
 	m_mainLight->quadratic = 0.032f;
+	//pass light to the entity engine
 	m_entityEngine->AddRenderPointLight(m_mainLight);
 
 	m_mainDLight = new DirectionalLight;
@@ -74,14 +75,17 @@ bool PauseState::Init()
 	m_mainDLight->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
 	m_mainDLight->specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	m_mainDLight->ambient = glm::vec3(0.0f, 0.0f, 0.0f);
+	//pass light to the entity engine
 	m_entityEngine->AddRenderDirectionalLight(m_mainDLight);
 
+	//initalise camera
 	m_fpsCam = new FPSCamera(glm::vec3(0,0,9), glm::vec3(-90,0,-90), 16.0f);
 	m_entityEngine->AddCamera(m_fpsCam);
 
 	//load assets
 	m_assetBox->LoadAsset("PausePlane", "Models/PausePlane/PausePlane.obj");
 
+	//create the pause box
 	m_pauseBox = new StaticObject("PausePlane", m_assetBox->GetAsset("PausePlane"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(glm::radians(90.f), 0, 0));
 	m_gOList.push_back(m_pauseBox);
 
@@ -97,14 +101,17 @@ void PauseState::Update(float deltaTime)
 		return;
 	}
 
+	//update camera
 	m_fpsCam->UpdateCamera(deltaTime, false, false, false, false, false, 0, 0);
 
+	//update the game objects
 	for (std::vector<GameObject*>::iterator it = m_gOList.begin(); it != m_gOList.end();)
 	{
 		(*it)->Update(deltaTime);
 		it++;
 	}
 
+	//update the entity engine, this updates all the nodes
 	m_entityEngine->Update(deltaTime);
 
 	SDL_GL_SwapWindow(GetWindow());
@@ -126,6 +133,7 @@ void PauseState::Shutdown()
 
 bool PauseState::BInitShaders()
 {
+	//create the shader and check that it's working
 	m_sceneShader = new Shader("scene", "Shaders\\scene_shader.vs", "Shaders\\scene_shader.frag");
 	if (m_sceneShader->getIsShaderOkay() != true)
 	{

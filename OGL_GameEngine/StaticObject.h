@@ -11,6 +11,7 @@ class StaticObject : public GameObject
 public:
 	StaticObject(const std::string gameModelName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(gameModelName), m_gameEE(gameEE)
 	{
+		//create all the components and nodes, then pass them to the entity engine
 		m_transformComp = new TransformComponent(initPos, initRot, true);
 		m_transformNode = new TransformNode(m_transformComp);
 		gameEE->AddTransformNode(m_transformNode);
@@ -38,6 +39,7 @@ public:
 
 private:
 
+	//game objects hold the components and nodes
 	RenderComponent* m_rComp;
 	RenderNode* m_renderNode;
 

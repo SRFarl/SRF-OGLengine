@@ -1,8 +1,5 @@
 #include "FPSCamera.h"
 
-//////////////////////////////////////////////////////////////////////////
-//Camera Constructor
-//////////////////////////////////////////////////////////////////////////
 FPSCamera::FPSCamera(glm::vec3 initPos, glm::vec3 initRotDir, float sensitivity) : m_cameraSpeed(3.0f), m_sensitivity(sensitivity)
 {
 	eye = initPos;	//position of camera
@@ -11,22 +8,20 @@ FPSCamera::FPSCamera(glm::vec3 initPos, glm::vec3 initRotDir, float sensitivity)
 
 	//initialise variables
 	rotationAngles = initRotDir;
-	m_lmouseX = WINWIDTH/2;
-	m_lmouseY = WINHEIGHT/2;
 
 	//init proj mat
 	proj = glm::perspective(45.0f, ((float)WINWIDTH / (float)WINHEIGHT), 0.1f, 100.0f);
 
+	//build view matrix
 	view = glm::lookAt(eye, eye + centre, up);
 }
 
-//////////////////////////////////////////////////////////////////////////
-//Update for the cameras movement and direction
-//////////////////////////////////////////////////////////////////////////
 void FPSCamera::UpdateCamera(float deltaTs, bool forward, bool backward, bool left, bool right, bool leftMouseDown, GLfloat mouseXRel, GLfloat mouseYRel)
 {
+	//if the left mouse is down then we want to pan our camera
 	if (leftMouseDown)
 	{
+		//update mouse changes to be relative to sensitivity and frame time
 		mouseXRel *= (m_sensitivity * deltaTs);
 		mouseYRel *= (m_sensitivity * deltaTs);
 
@@ -34,6 +29,7 @@ void FPSCamera::UpdateCamera(float deltaTs, bool forward, bool backward, bool le
 		rotationAngles.y -= mouseYRel;	//pitch
 	}
 
+	//clamp rotation axis to stop gimble lock
 	if (rotationAngles.y > 89.0f)
 		rotationAngles.y = 89.0f;
 	if (rotationAngles.y < -89.0f)
@@ -45,6 +41,7 @@ void FPSCamera::UpdateCamera(float deltaTs, bool forward, bool backward, bool le
 	centreTemp.y = glm::sin(glm::radians(rotationAngles.y));
 	centreTemp.z = glm::cos(glm::radians(rotationAngles.y)) * glm::sin(glm::radians(rotationAngles.x));
 	centre = glm::normalize(centreTemp);
+
 	//key movement. based on viewing direction
 	if(forward)
 	{
@@ -72,10 +69,12 @@ void FPSCamera::UpdateCamera(float deltaTs, bool forward, bool backward, bool le
 
 }
 
+
 glm::vec3 FPSCamera::CreateMouseRayFromCamera(float mouseXPos, float mouseYPos)
 {
 	//https://capnramses.github.io//opengl/raycasting.html
 
+	//get viewport width and height
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
 

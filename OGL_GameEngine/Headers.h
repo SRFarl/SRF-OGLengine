@@ -2,20 +2,20 @@
 #ifndef _HEADERS_H_
 #define _HEADERS_H_
 
-#include <SDL.h>
-#include "GL/glew.h"
+#include <SDL.h>	//window creation
+#include "GL/glew.h"	//opengl glew
 #include <iostream>
 #include <glm.hpp> // This is the main GLM header
-#include <gtc/matrix_transform.hpp> // This one lets us use matrix transformations
+#include <gtc/matrix_transform.hpp> // matrix transformations
 #include <gtc/type_ptr.hpp>
 #include <gtc/quaternion.hpp>
 #include <gtx/quaternion.hpp>
 #include <vector>
 #include <sstream>
 #include <string>
-#include <SOIL.h>
+#include <SOIL.h>	//header for file loading
 #include <list>
-#include <assimp/Importer.hpp>
+#include <assimp/Importer.hpp>	//assimp is a model loader
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
@@ -27,11 +27,6 @@
 #define PI 3.14159265359
 #define HALF_PI 1.57079632679
 #define GAMMA_CORRECTION 2.2
-
-class RenderComponent;
-class RenderNode;
-class TransformComponent;
-class TransformNode;
 
 struct PointLight {
 	glm::vec3 position;
@@ -52,7 +47,7 @@ struct DirectionalLight {
 	glm::vec3 specular;
 };
 
-/* THIS ERROR CHECKER SAVED MY SANITY 
+/* THIS ERROR CHECKER SAVED MY SANITY -- OPENGL DEBUGGING FUNCTION
 void _CheckGLError(const char* file, int line);
 
 #define CheckGLError() _CheckGLError(__FILE__, __LINE__)

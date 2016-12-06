@@ -84,6 +84,8 @@ namespace Math
 	bool RaySphereIntersect(glm::vec3 raydir, glm::vec3 rayorig, glm::vec3 pos,
 		float rad)
 	{
+		//http://sci.tuomastonteri.fi/programming/sse/example3
+
 		float a = VectorSum(raydir*raydir);
 		float b = VectorSum(raydir * (2.0f * (rayorig - pos)));
 		float c = VectorSum(pos*pos) + VectorSum(rayorig*rayorig) - 2.0f*VectorSum(rayorig*pos) - rad*rad;
@@ -107,6 +109,8 @@ namespace Math
 
 	float KinematicSphereStaticSphereCollision(glm::vec3 centerA, glm::vec3 DirectionA, float radiusA, glm::vec3 centerB, float radiusB)
 	{
+		//http://www.gamasutra.com/view/feature/3015/pool_hall_lessons_fast_accurate_.php
+
 		// Find C, the vector from the center of the moving 
 		// circle A to the center of B
 		glm::vec3 C = centerB - centerA;

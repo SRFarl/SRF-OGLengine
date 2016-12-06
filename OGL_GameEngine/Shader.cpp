@@ -54,6 +54,7 @@ Shader::Shader(std::string shaderName, const GLchar* vertexShaderPath, const GLc
 	glShaderSource(nVertShader, 1, &vertexShaderCode, NULL);
 	glCompileShader(nVertShader);
 
+	//error checking
 	GLint vShaderCompiled = GL_FALSE;
 	glGetShaderiv(nVertShader, GL_COMPILE_STATUS, &vShaderCompiled);
 	if (vShaderCompiled != GL_TRUE)
@@ -83,6 +84,7 @@ Shader::Shader(std::string shaderName, const GLchar* vertexShaderPath, const GLc
 	glShaderSource(nFragShader, 1, &fragmentShaderCode, NULL);
 	glCompileShader(nFragShader);
 
+	//error checking
 	GLint fShaderCompiled = GL_FALSE;
 	glGetShaderiv(nFragShader, GL_COMPILE_STATUS, &fShaderCompiled);
 	if (fShaderCompiled != GL_TRUE)
@@ -128,6 +130,7 @@ Shader::Shader(std::string shaderName, const GLchar* vertexShaderPath, const GLc
 
 Shader::~Shader()
 {
+	//delete the program if it's not null
 	if (m_glprogram)
 	{
 		glDeleteProgram(m_glprogram);
@@ -136,6 +139,7 @@ Shader::~Shader()
 
 bool CheckShaderCompiled(GLint shader)
 {
+	//checks if the shader is compiled by looking at error logs
 	GLint compiled;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 	if (!compiled)

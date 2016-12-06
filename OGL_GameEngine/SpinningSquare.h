@@ -11,6 +11,7 @@ class SpinningSquare : public GameObject
 public:
 	SpinningSquare(const std::string gameModelName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot, float _gravity) : GameObject(gameModelName), m_gameEE(gameEE), gravity(_gravity)
 	{
+		//create all the components and nodes, then pass them to the entity engine
 		m_transformComp = new TransformComponent(initPos, initRot, !_gravity);
 		m_transformNode = new TransformNode(m_transformComp);
 		gameEE->AddTransformNode(m_transformNode);
@@ -24,6 +25,7 @@ public:
 		m_movableNode = new MovableNode(m_mComp, m_transformComp);
 		gameEE->AddMovableNode(m_movableNode);
 
+		//get the aabb data from the model
 		glm::vec3 aabbmin;
 		glm::vec3 aabbmax;
 		glm::vec3 aabbmid;
@@ -56,12 +58,15 @@ public:
 	void Update(float deltaT)
 	{
 		if (gravity)
+			//apply a gravity force
 			m_movableNode->movable->m_acceleration += glm::vec3(0, -9.8f, 0);
 	}
 
 private:
 	bool gravity;
 
+private:
+	//game objects hold the components and nodes
 	AABBCollisionComponent* m_aabbComp;
 	AABBCollisionNode* m_aabbNode;
 

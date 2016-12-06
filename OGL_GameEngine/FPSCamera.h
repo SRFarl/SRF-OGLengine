@@ -11,15 +11,13 @@ class FPSCamera
 		glm::mat4 proj;		//projection matrix for the camera
 
 		glm::vec3 eye;		//LookAt variables
-		glm::vec3 centre;
+		glm::vec3 centre;	
 		glm::vec3 up;
 
 		glm::vec3 rotationAngles;	//XYZ rotations about the init
 
-		int m_lmouseX;
-		int m_lmouseY;
-		float m_cameraSpeed;
-		GLfloat m_sensitivity;
+		float m_cameraSpeed;		//speed that the camera moves
+		GLfloat m_sensitivity;		//panning sensitivity
 
 	public:
 		FPSCamera(glm::vec3 initPos, glm::vec3 initDir, float sensitivity);

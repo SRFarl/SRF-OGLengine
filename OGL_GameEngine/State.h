@@ -20,7 +20,6 @@ public:
 	SDL_Window* GetWindow();
 	StateManager* GetStateManager();
 
-	bool m_killState;
 private:
 	SDLInputHandler* m_GEinput;
 	StateManager* m_stateManager;
