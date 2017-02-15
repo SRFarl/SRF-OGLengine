@@ -54,7 +54,7 @@ public:
 		for (std::vector<RenderNode*>::iterator it = m_rnList.begin(); it != m_rnList.end();)
 		{
 			//render every mesh of the model
-			for (std::vector<Mesh>::iterator it2 = (*it)->render->m_rcModel->m_meshes.begin(); it2 != (*it)->render->m_rcModel->m_meshes.end();)
+			for (std::vector<ModelMesh>::iterator it2 = (*it)->render->m_rcModel->m_meshes.begin(); it2 != (*it)->render->m_rcModel->m_meshes.end();)
 			{
 				//set the gl program
 				glUseProgram((*it)->render->m_program);

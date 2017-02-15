@@ -1,5 +1,5 @@
-#ifndef _MESH_H_
-#define _MESH_H_
+#ifndef _MODELMESH_H_
+#define _MODELMESH_H_
 #include "Headers.h"
 
 struct Vertex {
@@ -16,13 +16,13 @@ struct Texture {
 	std::string type;
 };
 
-class Mesh {
+class ModelMesh {
 public:
 	std::vector<Vertex> m_vertices;
 	std::vector<GLuint> m_indices;
 	std::vector<Texture> m_textures;
 
-	Mesh(std::vector<Vertex>* _vertices, std::vector<GLuint>* _indices, std::vector<Texture>* _textures) : m_vertices(*_vertices), m_indices(*_indices), m_textures(*_textures)
+	ModelMesh(std::vector<Vertex>* _vertices, std::vector<GLuint>* _indices, std::vector<Texture>* _textures) : m_vertices(*_vertices), m_indices(*_indices), m_textures(*_textures)
 	{
 		Setup();
 	};

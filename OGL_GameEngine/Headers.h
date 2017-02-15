@@ -19,6 +19,27 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "flex/core/types.h"
+#include "flex/core/maths.h"
+#include "flex/core/platform.h"
+//#include "flex/core/shader.h"
+#include "flex/core/mesh.h"
+#include "flex/core/voxelize.h"
+#include "flex/core/sdf.h"
+#include "flex/core/pfm.h"
+#include "flex/core/tga.h"
+#include "flex/core/perlin.h"
+#include "flex/core/convex.h"
+#include "flex/core/cloth.h"
+
+#include "flex/include/flex.h"
+#include "flex/include/flexExt.h"
+
+//cuda stuff
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cuda_gl_interop.h>
+
 #define WINPOSX 100
 #define WINPOSY 100
 #define WINWIDTH 1280
