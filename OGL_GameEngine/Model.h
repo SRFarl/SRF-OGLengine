@@ -2,13 +2,14 @@
 #define _MODEL_H_
 #include "Headers.h"
 #include "ModelMesh.h"
+#include "Math.h"
 
 GLint TextureFromFile(const char* path, std::string directory);
 
 class Model
 {
 public:
-	Model(GLchar* path, std::string _modelName);
+	Model(GLchar* path, std::string _modelName, bool _dynamicDrawing);
 
 	~Model();
 
@@ -19,6 +20,7 @@ public:
 	std::vector<ModelMesh> m_meshes;
 
 private:
+	bool dynamicDrawing;
 	std::string m_directory;
 	std::string m_name;
 

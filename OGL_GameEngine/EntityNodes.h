@@ -55,4 +55,17 @@ public:
 	TransformComponent* transform;
 };
 
+class FlexRigidNode
+{
+
+public:
+	FlexRigidNode(FlexBaseComponent* _flexBase, FlexRigidComponent* _flexRigid) : flexBase(_flexBase), flexRigid(_flexRigid) {};
+	FlexRigidNode(RenderComponent* _render, FlexBaseComponent* _flexBase, FlexRigidComponent* _flexRigid) : render(_render), flexBase(_flexBase), flexRigid(_flexRigid) {};
+
+	RenderComponent* render;
+	FlexBaseComponent* flexBase;
+	FlexRigidComponent* flexRigid;
+
+};
+
 #endif

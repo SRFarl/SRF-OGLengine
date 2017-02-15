@@ -31,6 +31,10 @@ private:
 private: //SDL
 	SDL_Window* m_Window;
 	SDL_GLContext m_Glcontext;
+
+private: //FleX and CUDA
+	int m_cudaDevice;
+	char m_device[256];
 };
 
 CmainApp::CmainApp(int argc, char *argv[])
@@ -70,6 +74,17 @@ bool CmainApp::BInit()
 	//init SDL
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 		return false;
+
+	//init flex
+	FlexError fErr = flexInit(FLEX_VERSION, flexutil::ErrorCallback, m_cudaDevice);
+
+	if (fErr != eFlexErrorNone)
+	{
+		printf("Error (%d), could not initialize flex\n", fErr);
+		exit(-1);
+	}
+
+	std::cout << "INFO: Using Nvidia FleX: " << flexGetVersion() << std::endl;
 
 	//set opengl version to 4.3
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -124,6 +139,13 @@ bool CmainApp::BInit()
 	std::cout << "INFO: OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 	std::cout << "INFO: OpenGL Shading Language Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 	
+	cudaGetDevice(&m_cudaDevice);
+
+	// retrieve device name
+	cudaDeviceProp prop;
+	cudaCheck(cudaGetDeviceProperties(&prop, m_cudaDevice));
+	memcpy(m_device, prop.name, 256);
+
 	//set the mouse to be locked in the window
 	//SDL_SetRelativeMouseMode(SDL_TRUE);
 

@@ -11,6 +11,7 @@ private:
 	MovableSystem* m_movableSystem;
 	TransformSystem* m_transformSystem;
 	CollisionSystem* m_collisionSystem;
+	FlexRigidSystem* m_flexRigidSystem;
 
 public:
 	EntityEngine()
@@ -19,10 +20,12 @@ public:
 		m_transformSystem = new TransformSystem();
 		m_renderSystem = new RenderSystem();
 		m_collisionSystem = new CollisionSystem();
+		m_flexRigidSystem = new FlexRigidSystem();
 	}
 
 	~EntityEngine()
 	{
+		delete m_flexRigidSystem;
 		delete m_collisionSystem;
 		delete m_transformSystem;
 		delete m_renderSystem;
@@ -31,6 +34,7 @@ public:
 
 	void Update(float deltaT)
 	{
+		m_flexRigidSystem->Update(deltaT);
 		m_collisionSystem->Update(deltaT);
 		m_movableSystem->Update(deltaT);
 		m_transformSystem->Update(deltaT);
@@ -120,6 +124,18 @@ public:
 	void RemoveAABBCollisionNode(AABBCollisionNode* in)
 	{
 		m_collisionSystem->RemoveAABBCollisionNode(in);
+	}
+
+	//flex rigid
+	void AddFlexRigidNode(FlexRigidNode* in)
+	{
+		m_flexRigidSystem->AddNode(in);
+		m_flexRigidSystem->Init(in);
+	}
+
+	void RemoveFlexRigidNode(FlexRigidNode* in)
+	{
+		m_flexRigidSystem->RemoveNode(in);
 	}
 };
 

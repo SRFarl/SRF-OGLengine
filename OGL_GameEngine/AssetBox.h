@@ -13,10 +13,10 @@ public:
 		m_assetList.clear();
 	}
 
-	void LoadAsset(std::string _assetName, GLchar* modelPath)
+	void LoadAsset(std::string _assetName, GLchar* modelPath, bool dynamicDrawing)
 	{
 		//create a model and then add it to the box
-		Model temp(modelPath, _assetName);
+		Model temp(modelPath, _assetName, dynamicDrawing);
 		m_assetList.push_back(temp);
 	}
 

@@ -108,4 +108,66 @@ public:
 	glm::vec3 m_maxOffset;
 	glm::vec3 m_midOffset;
 };
+
+class FlexBaseComponent
+{
+public:
+	FlexBaseComponent(int numberOfParticles, int _numsubsteps) : m_flex(NULL), m_numSubsteps(_numsubsteps)
+	{
+		m_flex = flexCreateSolver(numberOfParticles, numberOfParticles, 96);
+	};
+
+	~FlexBaseComponent()
+	{
+		flexDestroySolver(m_flex);
+	}
+
+	FlexSolver* m_flex;
+	int m_numSubsteps;
+};
+
+class FlexRigidComponent
+{
+public:
+	FlexRigidComponent()
+	{
+	};
+
+	FlexParams m_params;
+	std::vector<Instance> m_instances;
+
+	std::vector<Vec4> m_positions;
+	std::vector<Vec4> m_restPositions;
+	std::vector<Vec3> m_velocities;
+	std::vector<Vec4> m_normals;
+	std::vector<int> m_phases;
+	std::vector<int> m_activeIndices;
+
+	std::vector<int> m_rigidOffsets;
+	std::vector<int> m_rigidIndices;
+	std::vector<float> m_rigidCoefficients;
+	std::vector<Quat> m_rigidRotations;
+	std::vector<Vec3> m_rigidTranslations;
+	std::vector<Vec3> m_rigidLocalPositions;
+	std::vector<Vec4> m_rigidLocalNormals;
+
+	std::vector<int> m_springIndices;
+	std::vector<float> m_springLengths;
+	std::vector<float> m_springStiffness;
+
+	Vec3 m_scale;
+	Vec3 m_offset;
+	float m_radius;
+	float m_clusterSpacing;
+	float m_clusterRadius;
+	float m_clusterStiffness;
+	float m_linkRadius;
+	float m_linkStiffness;
+	float m_surfaceSampling;
+	float m_volumeSampling;
+	float m_skinningFalloff;
+	float m_skinningMaxDistance;
+
+};
+
 #endif

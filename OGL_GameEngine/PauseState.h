@@ -83,7 +83,7 @@ bool PauseState::Init()
 	m_entityEngine->AddCamera(m_fpsCam);
 
 	//load assets
-	m_assetBox->LoadAsset("PausePlane", "Models/PausePlane/PausePlane.obj");
+	m_assetBox->LoadAsset("PausePlane", "Models/PausePlane/PausePlane.obj", false);
 
 	//create the pause box
 	m_pauseBox = new StaticObject("PausePlane", m_assetBox->GetAsset("PausePlane"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(glm::radians(90.f), 0, 0));

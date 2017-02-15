@@ -49,6 +49,18 @@
 #define HALF_PI 1.57079632679
 #define GAMMA_CORRECTION 2.2
 
+#define cudaCheck(x) { cudaError_t err = x; if (err != cudaSuccess) { printf("Cuda error: %d in %s at %s:%d\n", err, #x, __FILE__, __LINE__); assert(0); } }
+
+struct Instance
+{
+	Mesh* m_mesh;
+	std::vector<int> m_skinningIndices;
+	std::vector<float> m_skinningWeights;
+	std::vector<Vec3> m_rigidRestPoses;
+	Vec3 m_color;
+	int m_offset;
+};
+
 struct PointLight {
 	glm::vec3 position;
 

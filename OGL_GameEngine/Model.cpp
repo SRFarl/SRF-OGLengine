@@ -24,7 +24,7 @@ GLint TextureFromFile(const char* path, std::string directory)
 	return textureID;
 }
 
-Model::Model(GLchar* path, std::string _modelName) : m_name(_modelName)
+Model::Model(GLchar* path, std::string _modelName, bool _dynamicDrawing) : m_name(_modelName), dynamicDrawing(_dynamicDrawing)
 {
 	LoadModel(path);
 }
@@ -95,7 +95,7 @@ void Model::LoadModel(std::string path)
 {
 	//load the model with assimp
 	Assimp::Importer import;
-	const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = import.ReadFile(path, aiProcess_JoinIdenticalVertices | aiProcess_FlipUVs);
 
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -163,6 +163,27 @@ ModelMesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 			indices.push_back(face.mIndices[j]);
 	}
 
+	//if no normals exist, build our own
+	if (!mesh->mNormals)
+	{
+		for (int i = 0; i < indices.size(); i += 3)
+		{
+			//calculate normal for every triangle of the mesh
+			glm::vec3 v0 = vertices[indices[i]].Position;
+			glm::vec3 v1 = vertices[indices[i + 1]].Position;
+			glm::vec3 v2 = vertices[indices[i + 2]].Position;
+
+			glm::vec3 n = Math::FindNormal(v0, v1, v2);
+
+			vertices[indices[i]].Normal += n;
+			vertices[indices[i + 1]].Normal += n;
+			vertices[indices[i + 2]].Normal += n;
+		}
+
+		for (int i = 0; i < vertices.size(); i++)
+			vertices[i].Normal = glm::normalize(vertices[i].Normal);
+	}
+
 	// Process material
 	if (mesh->mMaterialIndex >= 0)
 	{
@@ -178,7 +199,13 @@ ModelMesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 	}
 
-	return ModelMesh(&vertices, &indices, &textures);
+	if (textures.size() == 0)
+	{
+		for (int i = 0; i < vertices.size(); i++)
+			vertices[i].VertexColour = glm::vec3(0.2f, 0.8f, 0.2f);
+	}
+
+	return ModelMesh(&vertices, &indices, &textures, dynamicDrawing);
 }
 
 std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)

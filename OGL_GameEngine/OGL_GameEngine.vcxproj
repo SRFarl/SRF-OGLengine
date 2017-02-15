@@ -86,7 +86,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CONSOLE;WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(CUDA_PATH)/include;$(CUDA_PATH)/extras/cupti/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -101,7 +101,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CONSOLE;WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(CUDA_PATH)/include;$(CUDA_PATH)/extras/cupti/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -118,7 +118,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CONSOLE;WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(CUDA_PATH)/include;$(CUDA_PATH)/extras/cupti/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -137,7 +137,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CONSOLE;WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(CUDA_PATH)/include;$(CUDA_PATH)/extras/cupti/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -150,16 +150,55 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FlexRigidObject.cpp" />
+    <ClCompile Include="flexutil.cpp" />
+    <ClCompile Include="flex\core\aabbtree.cpp" />
+    <ClCompile Include="flex\core\core.cpp" />
+    <ClCompile Include="flex\core\maths.cpp" />
+    <ClCompile Include="flex\core\mesh.cpp" />
+    <ClCompile Include="flex\core\perlin.cpp" />
+    <ClCompile Include="flex\core\pfm.cpp" />
+    <ClCompile Include="flex\core\platform.cpp" />
+    <ClCompile Include="flex\core\sdf.cpp" />
+    <ClCompile Include="flex\core\tga.cpp" />
+    <ClCompile Include="flex\core\voxelize.cpp" />
     <ClCompile Include="FPSCamera.cpp" />
     <ClCompile Include="glew.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Math.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="OBJLoader_SRF.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="State.cpp" />
     <ClCompile Include="StateManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetBox.h" />
+    <ClInclude Include="FlexRigidObject.h" />
+    <ClInclude Include="flexutil.h" />
+    <ClInclude Include="flex\core\aabbtree.h" />
+    <ClInclude Include="flex\core\cloth.h" />
+    <ClInclude Include="flex\core\convex.h" />
+    <ClInclude Include="flex\core\core.h" />
+    <ClInclude Include="flex\core\mat22.h" />
+    <ClInclude Include="flex\core\mat33.h" />
+    <ClInclude Include="flex\core\mat44.h" />
+    <ClInclude Include="flex\core\maths.h" />
+    <ClInclude Include="flex\core\matnn.h" />
+    <ClInclude Include="flex\core\mesh.h" />
+    <ClInclude Include="flex\core\perlin.h" />
+    <ClInclude Include="flex\core\pfm.h" />
+    <ClInclude Include="flex\core\platform.h" />
+    <ClInclude Include="flex\core\point3.h" />
+    <ClInclude Include="flex\core\quat.h" />
+    <ClInclude Include="flex\core\sdf.h" />
+    <ClInclude Include="flex\core\skylight.h" />
+    <ClInclude Include="flex\core\tga.h" />
+    <ClInclude Include="flex\core\types.h" />
+    <ClInclude Include="flex\core\vec2.h" />
+    <ClInclude Include="flex\core\vec3.h" />
+    <ClInclude Include="flex\core\vec4.h" />
+    <ClInclude Include="flex\core\voxelize.h" />
     <ClInclude Include="FPSCamera.h" />
     <ClInclude Include="EntityNodes.h" />
     <ClInclude Include="EntitiySystem.h" />

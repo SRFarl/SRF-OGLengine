@@ -3,6 +3,7 @@
 #include "EntityNodes.h"
 #include "FPSCamera.h"
 #include "Math.h"
+#include "flexutil.h"
 
 //systems only hold references to nodes and logic
 
@@ -562,5 +563,101 @@ public:
 	}
 };
 
+class FlexRigidSystem : public ISystem
+{
+private:
+	std::vector <FlexRigidNode*> m_frList;
+
+public:
+
+	void AddNode(FlexRigidNode* in)
+	{
+		//add a node to the system
+		m_frList.push_back(in);
+	}
+
+	void RemoveNode(FlexRigidNode* in)
+	{
+		//remove a node from the system
+		for (std::vector<FlexRigidNode*>::iterator it = m_frList.begin(); it != m_frList.end();)
+		{
+			if ((*it) == in)
+			{
+				m_frList.erase(it);
+				return;
+			}
+			++it;
+		}
+
+	}
+
+	void Update(float deltaT)
+	{
+		//flex rigid system update lop
+		for (std::vector<FlexRigidNode*>::iterator it = m_frList.begin(); it != m_frList.end();)
+		{
+			// always set positions to flush any other updates (i.e. mouse picking)
+			flexSetParticles((*it)->flexBase->m_flex, &(*it)->flexRigid->m_positions[0].x, (*it)->flexRigid->m_positions.size(), eFlexMemoryHost);
+			flexSetVelocities((*it)->flexBase->m_flex, &(*it)->flexRigid->m_velocities[0].x, (*it)->flexRigid->m_velocities.size(), eFlexMemoryHost);
+			flexSetPhases((*it)->flexBase->m_flex, &(*it)->flexRigid->m_phases[0], (*it)->flexRigid->m_phases.size(), eFlexMemoryHost);
+
+			flexSetParams((*it)->flexBase->m_flex, &(*it)->flexRigid->m_params);
+			flexUpdateSolver((*it)->flexBase->m_flex, deltaT, (*it)->flexBase->m_numSubsteps, NULL);
+
+			//now get
+			// need up to date positions host side for interaction / debug rendering
+			flexGetParticles((*it)->flexBase->m_flex, &(*it)->flexRigid->m_positions[0].x, (*it)->flexRigid->m_positions.size(), eFlexMemoryHost);
+			flexGetVelocities((*it)->flexBase->m_flex, &(*it)->flexRigid->m_velocities[0].x, (*it)->flexRigid->m_velocities.size(), eFlexMemoryHost);
+			flexGetNormals((*it)->flexBase->m_flex, &(*it)->flexRigid->m_normals[0].x, (*it)->flexRigid->m_normals.size(), eFlexMemoryHost);
+			if ((*it)->flexRigid->m_rigidOffsets.size())
+				flexGetRigidTransforms((*it)->flexBase->m_flex, (float*)&(*it)->flexRigid->m_rigidRotations[0], (float*)&(*it)->flexRigid->m_rigidTranslations[0], eFlexMemoryHost);
+
+			//update the render mesh vertices with the current deformation
+			flexutil::FindSoftBodyOffsets((*it)->flexRigid, (*it)->render);
+
+			it++;
+		}
+	}
+
+	void Init(FlexRigidNode* in)
+	{
+		flexSetParams(in->flexBase->m_flex, &in->flexRigid->m_params);
+
+		flexSetParticles(in->flexBase->m_flex, (float*)&in->flexRigid->m_positions[0], in->flexRigid->m_positions.size(), eFlexMemoryHost);
+		flexSetVelocities(in->flexBase->m_flex, (float*)&in->flexRigid->m_velocities[0], in->flexRigid->m_velocities.size(), eFlexMemoryHost);
+		flexSetNormals(in->flexBase->m_flex, (float*)&in->flexRigid->m_normals[0], in->flexRigid->m_normals.size(), eFlexMemoryHost);
+
+		in->flexRigid->m_activeIndices.resize(in->flexRigid->m_positions.size());
+		for (size_t i = 0; i < in->flexRigid->m_activeIndices.size(); ++i)
+			in->flexRigid->m_activeIndices[i] = i;
+
+		flexSetActive(in->flexBase->m_flex, &in->flexRigid->m_activeIndices[0], in->flexRigid->m_activeIndices.size(), eFlexMemoryHost);
+
+		flexSetPhases(in->flexBase->m_flex, &in->flexRigid->m_phases[0], in->flexRigid->m_phases.size(), eFlexMemoryHost);
+
+		// save rest positions
+		in->flexRigid->m_restPositions = in->flexRigid->m_positions;
+
+		flexSetRestParticles(in->flexBase->m_flex, (float*)&in->flexRigid->m_restPositions[0], in->flexRigid->m_restPositions.size(), eFlexMemoryHost);
+
+		// rigids
+		if (in->flexRigid->m_rigidOffsets.size())
+		{
+			assert(in->flexRigid->m_rigidOffsets.size() > 1);
+
+			const int numRigids = in->flexRigid->m_rigidOffsets.size() - 1;
+
+			// calculate local rest space positions
+			in->flexRigid->m_rigidLocalPositions.resize(in->flexRigid->m_rigidOffsets.back());
+			flexutil::CalculateRigidOffsets(&in->flexRigid->m_positions[0], &in->flexRigid->m_rigidOffsets[0], &in->flexRigid->m_rigidIndices[0], numRigids, &in->flexRigid->m_rigidLocalPositions[0]);
+
+			in->flexRigid->m_rigidRotations.resize(in->flexRigid->m_rigidOffsets.size() - 1, Quat());
+			in->flexRigid->m_rigidTranslations.resize(in->flexRigid->m_rigidOffsets.size() - 1, Vec3());
+
+			flexSetRigids(in->flexBase->m_flex, &in->flexRigid->m_rigidOffsets[0], &in->flexRigid->m_rigidIndices[0], (float*)&in->flexRigid->m_rigidLocalPositions[0], in->flexRigid->m_rigidLocalNormals.size() ? (float*)&in->flexRigid->m_rigidLocalNormals[0] : NULL, &in->flexRigid->m_rigidCoefficients[0], (float*)&in->flexRigid->m_rigidRotations[0], (float*)&in->flexRigid->m_rigidTranslations[0], numRigids, eFlexMemoryHost);
+		}
+	}
+
+};
 
 #endif

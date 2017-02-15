@@ -34,12 +34,15 @@ in vec3 vNormalV;
 in vec3 fragPos;
 in vec2 texCoord;
 in vec3 cameraPos;
+in vec3 vertColour;
 } fs_in;
 
 uniform Material material;
 uniform PointLight pLight[NR_POINT_LIGHTS];
 uniform DirectionalLight dLight;
+uniform bool diffuseMapping;
 uniform bool normalMapping;
+uniform bool specularMapping;
 uniform float gamma;
 
 out vec4 outputColor;
@@ -74,32 +77,56 @@ void main()
 
 vec3 RenderDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
 {
-	//de-gamma the texture
-	vec3 diffuseColour = vec3(pow(texture(material.diffuse1, fs_in.texCoord),vec4(gamma)));
-
+	vec3 returnVec = vec3(0.0f);
+	
+	vec3 diffuseColour = vec3(0.0f);
+	
+	if(diffuseMapping)
+	{
+		//de-gamma the texture
+		diffuseColour = vec3(pow(texture(material.diffuse1, fs_in.texCoord),vec4(gamma)));
+	} else {
+		diffuseColour = vec3(pow(fs_in.vertColour,vec3(gamma)));
+	}
+		
 	//directional light
 	vec3 lightDir = normalize(-light.direction);
 	
 	// Ambient
 	vec3 ambient = light.ambient * diffuseColour;
+	returnVec += ambient;
 	
 	// Diffuse 
 	float diff = max(dot(normal, lightDir), 0.0);
 	vec3 diffuse = light.diffuse * diff * diffuseColour;
+	returnVec += diffuse;
 	
 	// Specular
-	vec3 reflectDir = reflect(-lightDir, normal);  
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec3 specular = light.specular * spec * vec3(texture(material.specular1, fs_in.texCoord));
+	if(specularMapping)
+	{
+		vec3 reflectDir = reflect(-lightDir, normal);  
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+		vec3 specular = light.specular * spec * vec3(texture(material.specular1, fs_in.texCoord));
+		returnVec += specular;
+	}
 	
-	return vec3(ambient + diffuse + specular);
+	return returnVec;
 }
 
 vec3 RenderPointLight(PointLight light, vec3 normal, vec3 viewDir)
 {
-	//de-gamma the texture
-	vec3 diffuseColour = vec3(pow(texture(material.diffuse1, fs_in.texCoord),vec4(gamma)));
+	vec3 returnVec = vec3(0.0f);
 
+	vec3 diffuseColour = vec3(0.0f);
+	
+	if(diffuseMapping)
+	{
+		//de-gamma the texture
+		diffuseColour = vec3(pow(texture(material.diffuse1, fs_in.texCoord),vec4(gamma)));
+	} else {
+		diffuseColour = fs_in.vertColour;
+	}
+	
 	//point light 	
 	vec3 lightDir = normalize((light.position) - fs_in.fragPos);
 	
@@ -109,15 +136,21 @@ vec3 RenderPointLight(PointLight light, vec3 normal, vec3 viewDir)
 	
 	// Ambient
 	vec3 ambient = light.ambient * diffuseColour * attenuation;
+	returnVec += ambient;
 	
 	// Diffuse 
 	float diff = max(dot(normal, lightDir), 0.0);
 	vec3 diffuse = light.diffuse * diff * diffuseColour * attenuation;  
-
-	// Specular
-	vec3 reflectDir = reflect(-lightDir, normal);  
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec3 specular = light.specular * spec * vec3(texture(material.specular1, fs_in.texCoord)) * attenuation;
+	returnVec += diffuse;
 	
-	return vec3(ambient + diffuse + specular);
+	// Specular
+	if(specularMapping)
+	{
+		vec3 reflectDir = reflect(-lightDir, normal);  
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+		vec3 specular = light.specular * spec * vec3(texture(material.specular1, fs_in.texCoord)) * attenuation;
+		returnVec += specular;
+	}
+	
+	return returnVec;
 }

@@ -12,6 +12,7 @@
 #include "Shader.h"
 #include "SpinningSquare.h"
 #include "PauseState.h"
+#include "FlexRigidObject.h"
 
 class GameState : public State
 {
@@ -48,6 +49,8 @@ private:
 
 	SpinningSquare* m_spinnningSquare1;
 	SpinningSquare* m_spinnningSquare2;
+
+	FlexRigidObject* m_flexrigidobject;
 };
 
 GameState::GameState(StateManager* _stateManager, SDL_Window* _window, SDLInputHandler* _GEinput) : State(_stateManager, _window, _GEinput)
@@ -92,9 +95,10 @@ bool GameState::Init()
 	m_entityEngine->AddCamera(m_fpsCam);
 
 	//load assets
-	m_assetBox->LoadAsset("cube", "Models/brickbox/brickbox.obj");
-	m_assetBox->LoadAsset("sphere", "Models/Sphere/Sphere.obj");
-	m_assetBox->LoadAsset("woodfloor", "Models/woodfloor/woodfloor.obj");
+	m_assetBox->LoadAsset("cube", "Models/brickbox/brickbox.obj", false);
+	m_assetBox->LoadAsset("sphere", "Models/Sphere/Sphere.obj", false);
+	m_assetBox->LoadAsset("flexsphere", "Models/Sphere/Sphere.obj", false);
+	m_assetBox->LoadAsset("woodfloor", "Models/woodfloor/woodfloor.obj", false);
 
 	//create some game spheres
 	for (int i = 0; i < 10; i+=2)
@@ -114,6 +118,10 @@ bool GameState::Init()
 	//create a floor
 	m_woodFloor = new StaticObject("floor", m_assetBox->GetAsset("woodfloor"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, -1, 0), glm::vec3(0, 0, 0));
 	m_gOList.push_back(m_woodFloor);
+
+	//create flex rigid
+	m_flexrigidobject = new FlexRigidObject("flexsphere", m_assetBox->GetAsset("flexsphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 3, 0), glm::vec3(0, 0, 0));
+	m_gOList.push_back(m_flexrigidobject);
 
 	return true;
 }
@@ -176,6 +184,7 @@ void GameState::Shutdown()
 
 	delete m_spinnningSquare1;
 	delete m_spinnningSquare2;
+	delete m_flexrigidobject;
 
 	//clean app classes
 	delete m_sceneShader;

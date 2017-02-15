@@ -6,6 +6,7 @@ struct Vertex {
 	glm::vec3 Position;
 	glm::vec3 Normal;
 	glm::vec2 TexCoords;
+	glm::vec3 VertexColour;
 
 	glm::vec3 Tangent;
 	glm::vec3 BiTangent;
@@ -22,9 +23,9 @@ public:
 	std::vector<GLuint> m_indices;
 	std::vector<Texture> m_textures;
 
-	ModelMesh(std::vector<Vertex>* _vertices, std::vector<GLuint>* _indices, std::vector<Texture>* _textures) : m_vertices(*_vertices), m_indices(*_indices), m_textures(*_textures)
+	ModelMesh(std::vector<Vertex>* _vertices, std::vector<GLuint>* _indices, std::vector<Texture>* _textures, bool dynamicDrawing) : m_vertices(*_vertices), m_indices(*_indices), m_textures(*_textures)
 	{
-		Setup();
+		Setup(dynamicDrawing);
 	};
 
 	void Draw(GLuint program)
@@ -54,15 +55,27 @@ public:
 			// And finally bind the texture
 			glBindTexture(GL_TEXTURE_2D, this->m_textures[i].id);
 		}
+		//enable or disable diffuseMapping depending if it's available
+		if (diffuseNr == 1)
+			glUniform1i(glGetUniformLocation(program, "diffuseMapping"), false);
+		else
+			glUniform1i(glGetUniformLocation(program, "diffuseMapping"), true);
+
 		//enable or disable normalMapping depending if it's available
 		if (normalNr == 1)
 			glUniform1i(glGetUniformLocation(program, "normalMapping"), false);
 		else
 			glUniform1i(glGetUniformLocation(program, "normalMapping"), true);
 
+		//enable or disable specularMapping depending if it's available
+		if (specularNr == 1)
+			glUniform1i(glGetUniformLocation(program, "specularMapping"), false);
+		else
+			glUniform1i(glGetUniformLocation(program, "specularMapping"), true);
+
 		// Draw mesh
 		glBindVertexArray(this->m_VAO);
-		glDrawArrays(GL_TRIANGLES, 0, this->m_indices.size());
+		glDrawElements(GL_TRIANGLES, this->m_indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 		glBindVertexArray(0);
 
 		// Always good practice to set everything back to defaults once configured.
@@ -73,13 +86,15 @@ public:
 		}
 	}
 
+	GLuint GetVBO() { return m_VBO; };
+
 private:
 	GLuint m_VAO, m_VBO, m_EBO;
-	void Setup()
+	void Setup(bool dynamicDrawing)
 	{
-		ComputeTangents();
+		ComputeTangentsJoinedIdenticalVerts();
 
-		//intialise the opengl buffers
+		//initalise the opengl buffers
 		glGenVertexArrays(1, &m_VAO);
 		glGenBuffers(1, &m_VBO);
 		glGenBuffers(1, &m_EBO);
@@ -88,8 +103,15 @@ private:
 		glBindVertexArray(m_VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
-		glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex),
-			&m_vertices[0], GL_STATIC_DRAW);
+		if (!dynamicDrawing)
+		{
+			glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex),
+				&m_vertices[0], GL_STATIC_DRAW);
+		}
+		else {
+			glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex),
+				&m_vertices[0], GL_DYNAMIC_DRAW);
+		}
 
 		//element
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
@@ -108,13 +130,17 @@ private:
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 			(GLvoid*)offsetof(Vertex, TexCoords));
-		//vertex tangent
+		//vertex colour
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-			(GLvoid*)offsetof(Vertex, Tangent));
-		//vertex bitangent
+			(GLvoid*)offsetof(Vertex, VertexColour));
+		//vertex tangent
 		glEnableVertexAttribArray(4);
 		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+			(GLvoid*)offsetof(Vertex, Tangent));
+		//vertex bitangent
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 			(GLvoid*)offsetof(Vertex, BiTangent));
 
 		glBindVertexArray(0);
@@ -155,7 +181,37 @@ private:
 		}
 	}
 
+	void ComputeTangentsJoinedIdenticalVerts()
+	{
+		for (int i = 0; i < m_indices.size(); i += 3)
+		{
+			glm::vec3 &v0 = m_vertices[m_indices[i]].Position;
+			glm::vec3 &v1 = m_vertices[m_indices[i + 1]].Position;
+			glm::vec3 &v2 = m_vertices[m_indices[i + 2]].Position;
 
+			glm::vec2 &uv0 = m_vertices[m_indices[i]].TexCoords;
+			glm::vec2 &uv1 = m_vertices[m_indices[i + 1]].TexCoords;
+			glm::vec2 &uv2 = m_vertices[m_indices[i + 2]].TexCoords;
+
+			glm::vec3 deltaPos1 = v1 - v0;
+			glm::vec3 deltaPos2 = v2 - v0;
+
+			glm::vec2 deltaUV1 = uv1 - uv0;
+			glm::vec2 deltaUV2 = uv2 - uv0;
+
+			float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+			glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r;
+			glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x)*r;
+
+			m_vertices[m_indices[i]].Tangent = tangent;
+			m_vertices[m_indices[i + 1]].Tangent = tangent;
+			m_vertices[m_indices[i + 2]].Tangent = tangent;
+
+			m_vertices[m_indices[i]].BiTangent = bitangent;
+			m_vertices[m_indices[i + 1]].BiTangent = bitangent;
+			m_vertices[m_indices[i + 2]].BiTangent = bitangent;
+		}
+	}
 };
 
 
