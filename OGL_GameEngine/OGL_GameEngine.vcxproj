@@ -150,6 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FlexClothObject.cpp" />
     <ClCompile Include="FlexRigidObject.cpp" />
     <ClCompile Include="flexutil.cpp" />
     <ClCompile Include="flex\core\aabbtree.cpp" />
@@ -174,6 +175,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AssetBox.h" />
+    <ClInclude Include="FlexClothObject.h" />
     <ClInclude Include="FlexRigidObject.h" />
     <ClInclude Include="flexutil.h" />
     <ClInclude Include="flex\core\aabbtree.h" />

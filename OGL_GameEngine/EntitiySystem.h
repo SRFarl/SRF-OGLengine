@@ -660,4 +660,113 @@ public:
 
 };
 
+class FlexClothSystem : public ISystem
+{
+private:
+	std::vector <FlexClothNode*> m_fcList;
+
+public:
+
+	void AddNode(FlexClothNode* in)
+	{
+		//add a node to the system
+		m_fcList.push_back(in);
+	}
+
+	void RemoveNode(FlexClothNode* in)
+	{
+		//remove a node from the system
+		for (std::vector<FlexClothNode*>::iterator it = m_fcList.begin(); it != m_fcList.end();)
+		{
+			if ((*it) == in)
+			{
+				m_fcList.erase(it);
+				return;
+			}
+			++it;
+		}
+
+	}
+
+	void Update(float deltaT)
+	{
+		//flex rigid system update lop
+		for (std::vector<FlexClothNode*>::iterator it = m_fcList.begin(); it != m_fcList.end();)
+		{
+			// always set positions to flush any other updates (i.e. mouse picking)
+			flexSetParticles((*it)->flexBase->m_flex, &(*it)->flexCloth->m_positions[0].x, (*it)->flexCloth->m_positions.size(), eFlexMemoryHost);
+			flexSetVelocities((*it)->flexBase->m_flex, &(*it)->flexCloth->m_velocities[0].x, (*it)->flexCloth->m_velocities.size(), eFlexMemoryHost);
+			flexSetPhases((*it)->flexBase->m_flex, &(*it)->flexCloth->m_phases[0], (*it)->flexCloth->m_phases.size(), eFlexMemoryHost);
+
+			flexSetParams((*it)->flexBase->m_flex, &(*it)->flexCloth->m_params);
+			flexUpdateSolver((*it)->flexBase->m_flex, deltaT, (*it)->flexBase->m_numSubsteps, NULL);
+
+			//now get
+			// need up to date positions host side for interaction / debug rendering
+			flexGetParticles((*it)->flexBase->m_flex, &(*it)->flexCloth->m_positions[0].x, (*it)->flexCloth->m_positions.size(), eFlexMemoryHost);
+			flexGetVelocities((*it)->flexBase->m_flex, &(*it)->flexCloth->m_velocities[0].x, (*it)->flexCloth->m_velocities.size(), eFlexMemoryHost);
+			flexGetNormals((*it)->flexBase->m_flex, &(*it)->flexCloth->m_normals[0].x, (*it)->flexCloth->m_normals.size(), eFlexMemoryHost);
+			if ((*it)->flexCloth->m_triangles.size())
+				flexGetDynamicTriangles((*it)->flexBase->m_flex, &(*it)->flexCloth->m_triangles[0], &(*it)->flexCloth->m_triangleNormals[0].x, (*it)->flexCloth->m_triangles.size() / 3, eFlexMemoryHost);
+
+			it++;
+		}
+	}
+
+	void Init(FlexClothNode* in)
+	{
+		flexSetParams(in->flexBase->m_flex, &in->flexCloth->m_params);
+
+		// initialize normals (just for rendering before simulation starts)
+		in->flexCloth->m_normals.resize(in->flexCloth->m_positions.size());
+		int numTris = in->flexCloth->m_triangles.size() / 3;
+		for (int i = 0; i < numTris; ++i)
+		{
+			Vec3 v0 = Vec3(in->flexCloth->m_positions[in->flexCloth->m_triangles[i * 3 + 0]]);
+			Vec3 v1 = Vec3(in->flexCloth->m_positions[in->flexCloth->m_triangles[i * 3 + 1]]);
+			Vec3 v2 = Vec3(in->flexCloth->m_positions[in->flexCloth->m_triangles[i * 3 + 2]]);
+
+			Vec3 n = Cross(v1 - v0, v2 - v0);
+
+			in->flexCloth->m_normals[in->flexCloth->m_triangles[i * 3 + 0]] += Vec4(n, 0.0f);
+			in->flexCloth->m_normals[in->flexCloth->m_triangles[i * 3 + 1]] += Vec4(n, 0.0f);
+			in->flexCloth->m_normals[in->flexCloth->m_triangles[i * 3 + 2]] += Vec4(n, 0.0f);
+		}
+
+		for (int i = 0; i < in->flexCloth->m_normals.size(); ++i)
+			in->flexCloth->m_normals[i] = Vec4(SafeNormalize(Vec3(in->flexCloth->m_normals[i]), Vec3(0.0f, 1.0f, 0.0f)), 0.0f);
+
+		flexSetParticles(in->flexBase->m_flex, (float*)&in->flexCloth->m_positions[0], in->flexCloth->m_positions.size(), eFlexMemoryHost);
+		flexSetVelocities(in->flexBase->m_flex, (float*)&in->flexCloth->m_velocities[0], in->flexCloth->m_velocities.size(), eFlexMemoryHost);
+		flexSetNormals(in->flexBase->m_flex, (float*)&in->flexCloth->m_normals[0], in->flexCloth->m_normals.size(), eFlexMemoryHost);
+
+		in->flexCloth->m_activeIndices.resize(in->flexCloth->m_positions.size());
+		for (size_t i = 0; i < in->flexCloth->m_activeIndices.size(); ++i)
+			in->flexCloth->m_activeIndices[i] = i;
+
+		flexSetActive(in->flexBase->m_flex, &in->flexCloth->m_activeIndices[0], in->flexCloth->m_activeIndices.size(), eFlexMemoryHost);
+
+		// springs
+		if (in->flexCloth->m_springIndices.size())
+		{
+			assert((in->flexCloth->m_springIndices.size() & 1) == 0);
+			assert((in->flexCloth->m_springIndices.size() / 2) == in->flexCloth->m_springLengths.size());
+			flexSetSprings(in->flexBase->m_flex, &in->flexCloth->m_springIndices[0], &in->flexCloth->m_springLengths[0], &in->flexCloth->m_springStiffness[0], in->flexCloth->m_springLengths.size(), eFlexMemoryHost);
+		}
+
+		if (in->flexCloth->m_triangles.size())
+		{
+			flexSetDynamicTriangles(in->flexBase->m_flex, &in->flexCloth->m_triangles[0], &in->flexCloth->m_triangleNormals[0].x, in->flexCloth->m_triangles.size() / 3, eFlexMemoryHost);
+		}
+
+		flexSetPhases(in->flexBase->m_flex, &in->flexCloth->m_phases[0], in->flexCloth->m_phases.size(), eFlexMemoryHost);
+
+		// save rest positions
+		in->flexCloth->m_restPositions = in->flexCloth->m_positions;
+
+		flexSetRestParticles(in->flexBase->m_flex, (float*)&in->flexCloth->m_restPositions[0], in->flexCloth->m_restPositions.size(), eFlexMemoryHost);
+	}
+
+};
+
 #endif

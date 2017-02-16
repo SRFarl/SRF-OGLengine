@@ -68,4 +68,16 @@ public:
 
 };
 
+class FlexClothNode
+{
+
+public:
+	FlexClothNode(FlexBaseComponent* _flexBase, FlexClothComponent* _flexCloth) : flexBase(_flexBase), flexCloth(_flexCloth) {};
+	FlexClothNode(RenderComponent* _render, FlexBaseComponent* _flexBase, FlexClothComponent* _flexCloth) : render(_render), flexBase(_flexBase), flexCloth(_flexCloth) {};
+
+	RenderComponent* render;
+	FlexBaseComponent* flexBase;
+	FlexClothComponent* flexCloth;
+};
+
 #endif

@@ -40,6 +40,9 @@
     <Filter Include="FleXcore">
       <UniqueIdentifier>{ec0d0a13-c986-488a-9ea9-9100d43218e0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Objects">
+      <UniqueIdentifier>{e50231fb-815c-4d24-a45e-e9954c2d63e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -99,11 +102,14 @@
     <ClCompile Include="flex\core\voxelize.cpp">
       <Filter>FleXcore</Filter>
     </ClCompile>
-    <ClCompile Include="FlexRigidObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OBJLoader_SRF.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FlexClothObject.cpp">
+      <Filter>Source Files\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="FlexRigidObject.cpp">
+      <Filter>Source Files\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -252,7 +258,10 @@
       <Filter>FleXcore</Filter>
     </ClInclude>
     <ClInclude Include="FlexRigidObject.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="FlexClothObject.h">
+      <Filter>Header Files\Objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

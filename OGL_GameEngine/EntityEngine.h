@@ -12,6 +12,7 @@ private:
 	TransformSystem* m_transformSystem;
 	CollisionSystem* m_collisionSystem;
 	FlexRigidSystem* m_flexRigidSystem;
+	FlexClothSystem* m_flexClothSystem;
 
 public:
 	EntityEngine()
@@ -21,10 +22,12 @@ public:
 		m_renderSystem = new RenderSystem();
 		m_collisionSystem = new CollisionSystem();
 		m_flexRigidSystem = new FlexRigidSystem();
+		m_flexClothSystem = new FlexClothSystem();
 	}
 
 	~EntityEngine()
 	{
+		delete m_flexClothSystem;
 		delete m_flexRigidSystem;
 		delete m_collisionSystem;
 		delete m_transformSystem;
@@ -34,6 +37,7 @@ public:
 
 	void Update(float deltaT)
 	{
+		m_flexClothSystem->Update(deltaT);
 		m_flexRigidSystem->Update(deltaT);
 		m_collisionSystem->Update(deltaT);
 		m_movableSystem->Update(deltaT);
@@ -136,6 +140,18 @@ public:
 	void RemoveFlexRigidNode(FlexRigidNode* in)
 	{
 		m_flexRigidSystem->RemoveNode(in);
+	}
+
+	//flex cloth
+	void AddFlexClothNode(FlexClothNode* in)
+	{
+		m_flexClothSystem->AddNode(in);
+		m_flexClothSystem->Init(in);
+	}
+
+	void RemoveFlexClothNode(FlexClothNode* in)
+	{
+		m_flexClothSystem->RemoveNode(in);
 	}
 };
 

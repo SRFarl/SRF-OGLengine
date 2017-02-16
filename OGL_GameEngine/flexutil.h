@@ -17,6 +17,12 @@ namespace flexutil
 
 	void MakeBaseStaticInCorners(FlexRigidComponent* flexRigid);
 
+	void CreateSpringGrid(FlexClothComponent* flexCloth, std::vector<Vertex>* vertices, std::vector<GLuint>* indices, Vec3 velocity, float invMass = 1.0f);
+	
+	bool DoesSpringAlreadyExist(FlexClothComponent* flexCloth, int startIndice, int endIndice);
+
+	void CreateSpring(FlexClothComponent* flexCloth, int i, int j, float stiffness, float give = 0.0f);
+
 	void ErrorCallback(FlexErrorSeverity, const char* msg, const char* file, int line);
 }
 

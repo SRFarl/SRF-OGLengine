@@ -170,4 +170,35 @@ public:
 
 };
 
+class FlexClothComponent
+{
+public:
+	FlexClothComponent()
+	{
+	};
+
+	FlexParams m_params;
+	Vec3 m_offset;
+	float m_windTime;
+	int m_phase;
+
+	std::vector<Vec4> m_positions;
+	std::vector<Vec4> m_restPositions;
+	std::vector<Vec3> m_velocities;
+	std::vector<Vec4> m_normals;
+	std::vector<int> m_phases;
+	std::vector<int> m_activeIndices;
+
+	std::vector<int> m_springIndices;
+	std::vector<float> m_springLengths;
+	std::vector<float> m_springStiffness;
+
+	std::vector<int> m_triangles;
+	std::vector<Vec3> m_triangleNormals;
+
+	float m_stretchStiffness;
+	float m_bendStiffness;
+	float m_shearStiffness;
+};
+
 #endif

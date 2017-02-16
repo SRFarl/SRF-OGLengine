@@ -18,7 +18,7 @@ FlexRigidObject::FlexRigidObject(const std::string meshName, Model* modelAsset, 
 	m_frComp = new FlexRigidComponent();
 
 	//init flex variables and params
-	m_frComp->m_scale = Vec3(10.0f, 10.0f, 10.0f);
+	m_frComp->m_scale = Vec3(5.0f, 5.0f, 5.0f);
 	m_frComp->m_offset = Vec3(initPos.x, initPos.y, initPos.z);
 	m_frComp->m_clusterSpacing = 2.0f;
 	m_frComp->m_clusterRadius = 2.0f;

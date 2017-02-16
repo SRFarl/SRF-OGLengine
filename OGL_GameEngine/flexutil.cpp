@@ -333,6 +333,158 @@ void flexutil::MakeBaseStaticInCorners(FlexRigidComponent* flexRigid)
 
 }
 
+void flexutil::CreateSpringGrid(FlexClothComponent* flexCloth, std::vector<Vertex>* vertices, std::vector<GLuint>* indices, Vec3 velocity, float invMass /*= 1.0f*/)
+{
+	//loop over every vertice of the mesh
+	for (int i = 0; i < vertices->size(); i++)
+	{
+		//create position, phase, velocity for each point
+		flexCloth->m_positions.push_back(Vec4(flexCloth->m_offset.x + (*vertices)[i].Position.x, flexCloth->m_offset.y + (*vertices)[i].Position.y, flexCloth->m_offset.z + (*vertices)[i].Position.z, invMass));
+		flexCloth->m_velocities.push_back(velocity);
+		flexCloth->m_phases.push_back(flexCloth->m_phase);
+	}
+
+	//loop over every triangle in the mesh
+	for (int i = 0; i < indices->size(); i += 3)
+	{
+		flexCloth->m_triangles.push_back((*indices)[i]);
+		flexCloth->m_triangles.push_back((*indices)[i + 1]);
+		flexCloth->m_triangles.push_back((*indices)[i + 2]);
+
+		//create temp normal
+		flexCloth->m_triangleNormals.push_back(Vec3(0.0f, 1.0f, 0.0f));
+	}
+
+	//create springs
+	for (int i = 0; i < indices->size(); i += 3)
+	{
+		//create spring for the first edge of the triangle
+		if (!flexutil::DoesSpringAlreadyExist(flexCloth, (*indices)[i], (*indices)[i + 1]))
+			flexutil::CreateSpring(flexCloth, (*indices)[i], (*indices)[i + 1], flexCloth->m_stretchStiffness);
+
+		//create spring for the second edge of triangle
+		if (!flexutil::DoesSpringAlreadyExist(flexCloth, (*indices)[i + 1], (*indices)[i + 2]))
+			flexutil::CreateSpring(flexCloth, (*indices)[i + 1], (*indices)[i + 2], flexCloth->m_stretchStiffness);
+
+		//create spring for the third edge of triangle
+		if (!flexutil::DoesSpringAlreadyExist(flexCloth, (*indices)[i], (*indices)[i + 2]))
+			flexutil::CreateSpring(flexCloth, (*indices)[i], (*indices)[i + 2], flexCloth->m_stretchStiffness);
+
+		//create spring for opposite vertices across two triangles sharing an edge
+		for (int j = 0; j < indices->size(); j += 3)
+		{
+			//skip for same triangle
+			if (j == i)
+				continue;
+
+			//check to see if v1 and v2 share any other triangle edges
+			if ((*indices)[i] == (*indices)[j] && (*indices)[i + 1] == (*indices)[j + 1] ||
+				(*indices)[i] == (*indices)[j + 1] && (*indices)[i + 1] == (*indices)[j])
+			{
+				//triangle edge shared, create some spring from t1v3 - t2v3
+				if (!flexutil::DoesSpringAlreadyExist(flexCloth, (*indices)[i + 2], (*indices)[j + 2]))
+					flexutil::CreateSpring(flexCloth, (*indices)[i + 2], (*indices)[j + 2], flexCloth->m_stretchStiffness);
+				continue;
+			}
+
+			if ((*indices)[i] == (*indices)[j + 1] && (*indices)[i + 1] == (*indices)[j + 2] ||
+				(*indices)[i] == (*indices)[j + 2] && (*indices)[i + 1] == (*indices)[j + 1])
+			{
+				//triangle edge shared, create some spring t1v3 - t2v1
+				if (!flexutil::DoesSpringAlreadyExist(flexCloth, (*indices)[i + 2], (*indices)[j]))
+					flexutil::CreateSpring(flexCloth, (*indices)[i + 2], (*indices)[j], flexCloth->m_stretchStiffness);
+				continue;
+			}
+
+			if ((*indices)[i] == (*indices)[j] && (*indices)[i + 1] == (*indices)[j + 2] ||
+				(*indices)[i] == (*indices)[j + 2] && (*indices)[i + 1] == (*indices)[j])
+			{
+				//triangle edge shared, create some spring t1v3 - t2v2
+				if (!flexutil::DoesSpringAlreadyExist(flexCloth, (*indices)[i + 2], (*indices)[j + 1]))
+					flexutil::CreateSpring(flexCloth, (*indices)[i + 2], (*indices)[j + 1], flexCloth->m_stretchStiffness);
+				continue;
+			}
+
+			//check to see if v2 and v3 share any other triangle edges
+			if ((*indices)[i + 1] == (*indices)[j] && (*indices)[i + 2] == (*indices)[j + 1] ||
+				(*indices)[i + 1] == (*indices)[j + 1] && (*indices)[i + 2] == (*indices)[j])
+			{
+				//triangle edge shared, create some spring t1v1 - t2v3
+				if (!flexutil::DoesSpringAlreadyExist(flexCloth, (*indices)[i], (*indices)[j + 2]))
+					flexutil::CreateSpring(flexCloth, (*indices)[i], (*indices)[j + 2], flexCloth->m_stretchStiffness);
+				continue;
+			}
+
+			if ((*indices)[i + 1] == (*indices)[j + 1] && (*indices)[i + 2] == (*indices)[j + 2] ||
+				(*indices)[i + 1] == (*indices)[j + 2] && (*indices)[i + 2] == (*indices)[j + 1])
+			{
+				//triangle edge shared, create some spring t1v1 - t2v1
+				if (!flexutil::DoesSpringAlreadyExist(flexCloth, (*indices)[i], (*indices)[j]))
+					flexutil::CreateSpring(flexCloth, (*indices)[i], (*indices)[j], flexCloth->m_stretchStiffness);
+				continue;
+			}
+
+			if ((*indices)[i + 1] == (*indices)[j] && (*indices)[i + 2] == (*indices)[j + 2] ||
+				(*indices)[i + 1] == (*indices)[j + 2] && (*indices)[i + 2] == (*indices)[j])
+			{
+				//triangle edge shared, create some spring t1v1 - t2v2
+				if (!flexutil::DoesSpringAlreadyExist(flexCloth, (*indices)[i], (*indices)[j + 1]))
+					flexutil::CreateSpring(flexCloth, (*indices)[i], (*indices)[j + 1], flexCloth->m_stretchStiffness);
+				continue;
+			}
+
+			//check to see if v1 and v3 share any other triangle edges
+			if ((*indices)[i] == (*indices)[j] && (*indices)[i + 2] == (*indices)[j + 1] ||
+				(*indices)[i] == (*indices)[j + 1] && (*indices)[i + 2] == (*indices)[j])
+			{
+				//triangle edge shared, create some spring t1v2 - t2v3
+				if (!flexutil::DoesSpringAlreadyExist(flexCloth, (*indices)[i + 1], (*indices)[j + 2]))
+					flexutil::CreateSpring(flexCloth, (*indices)[i + 1], (*indices)[j + 2], flexCloth->m_stretchStiffness);
+				continue;
+			}
+
+			if ((*indices)[i] == (*indices)[j + 1] && (*indices)[i + 2] == (*indices)[j + 2] ||
+				(*indices)[i] == (*indices)[j + 2] && (*indices)[i + 2] == (*indices)[j + 1])
+			{
+				//triangle edge shared, create some spring t1v3 - t2v1
+				if (!flexutil::DoesSpringAlreadyExist(flexCloth, (*indices)[i + 1], (*indices)[j]))
+					flexutil::CreateSpring(flexCloth, (*indices)[i + 1], (*indices)[j], flexCloth->m_stretchStiffness);
+				continue;
+			}
+
+			if ((*indices)[i] == (*indices)[j] && (*indices)[i + 2] == (*indices)[j + 2] ||
+				(*indices)[i] == (*indices)[j + 2] && (*indices)[i + 2] == (*indices)[j])
+			{
+				//triangle edge shared, create some spring t1v3 - t2v2
+				if (!flexutil::DoesSpringAlreadyExist(flexCloth, (*indices)[i + 1], (*indices)[j + 1]))
+					flexutil::CreateSpring(flexCloth, (*indices)[i + 1], (*indices)[j + 1], flexCloth->m_stretchStiffness);
+				continue;
+			}
+		}
+	}
+}
+
+bool flexutil::DoesSpringAlreadyExist(FlexClothComponent* flexCloth, int startIndice, int endIndice)
+{
+	for (int i = 0; i < flexCloth->m_springIndices.size(); i += 2)
+	{
+		if (flexCloth->m_springIndices[i] == startIndice && flexCloth->m_springIndices[i + 1] == endIndice ||
+			flexCloth->m_springIndices[i + 1] == startIndice && flexCloth->m_springIndices[i] == endIndice)
+			return true;
+	}
+
+	return false;
+}
+
+void flexutil::CreateSpring(FlexClothComponent* flexCloth, int i, int j, float stiffness, float give /*= 0.0f*/)
+{
+	//taken from flex/demo/helpers.h
+	flexCloth->m_springIndices.push_back(i);
+	flexCloth->m_springIndices.push_back(j);
+	flexCloth->m_springLengths.push_back((1.0f + give)*Length(Vec3(flexCloth->m_positions[i]) - Vec3(flexCloth->m_positions[j])));
+	flexCloth->m_springStiffness.push_back(stiffness);
+}
+
 void flexutil::ErrorCallback(FlexErrorSeverity, const char* msg, const char* file, int line)
 {
 	printf("Flex: %s - %s:%d\n", msg, file, line);

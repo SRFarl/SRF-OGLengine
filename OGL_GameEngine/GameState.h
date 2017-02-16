@@ -12,6 +12,7 @@
 #include "Shader.h"
 #include "SpinningSquare.h"
 #include "PauseState.h"
+#include "FlexClothObject.h"
 #include "FlexRigidObject.h"
 
 class GameState : public State
@@ -51,6 +52,7 @@ private:
 	SpinningSquare* m_spinnningSquare2;
 
 	FlexRigidObject* m_flexrigidobject;
+	FlexClothObject* m_flexclothobject;
 };
 
 GameState::GameState(StateManager* _stateManager, SDL_Window* _window, SDLInputHandler* _GEinput) : State(_stateManager, _window, _GEinput)
@@ -99,6 +101,7 @@ bool GameState::Init()
 	m_assetBox->LoadAsset("sphere", "Models/Sphere/Sphere.obj", false);
 	m_assetBox->LoadAsset("flexsphere", "Models/Sphere/Sphere.obj", false);
 	m_assetBox->LoadAsset("woodfloor", "Models/woodfloor/woodfloor.obj", false);
+	m_assetBox->LoadAsset("cloth", "Models/cloth/cloth.obj", false);
 
 	//create some game spheres
 	for (int i = 0; i < 10; i+=2)
@@ -120,8 +123,12 @@ bool GameState::Init()
 	m_gOList.push_back(m_woodFloor);
 
 	//create flex rigid
-	m_flexrigidobject = new FlexRigidObject("flexsphere", m_assetBox->GetAsset("flexsphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 3, 0), glm::vec3(0, 0, 0));
+	m_flexrigidobject = new FlexRigidObject("flexsphere", m_assetBox->GetAsset("flexsphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(3, 3, 2), glm::vec3(0, 0, 0));
 	m_gOList.push_back(m_flexrigidobject);
+
+	//create flex cloth
+	m_flexclothobject = new FlexClothObject("cloth", m_assetBox->GetAsset("cloth"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(3, 3, 2), glm::vec3(0, 0, 0));
+	m_gOList.push_back(m_flexclothobject);
 
 	return true;
 }
@@ -185,6 +192,7 @@ void GameState::Shutdown()
 	delete m_spinnningSquare1;
 	delete m_spinnningSquare2;
 	delete m_flexrigidobject;
+	delete m_flexclothobject;
 
 	//clean app classes
 	delete m_sceneShader;
