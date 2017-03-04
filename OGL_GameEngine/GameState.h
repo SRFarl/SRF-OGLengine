@@ -73,7 +73,7 @@ bool GameState::Init()
 	//create managers
 	m_assetBox = new AssetBox();
 	m_entityEngine = new EntityEngine();
-	m_guiHandler = new GUIHandler("Shaders\\gui_shader.vs", "Shaders\\gui_shader.frag");
+	m_guiHandler = new GUIHandler("Shaders\\gui_shader.vs", "Shaders\\gui_shader.frag", "Shaders\\font_shader.vs", "Shaders\\font_shader.frag", 48);
 
 	//init gui
 	m_guiHandler->LoadSprite("testspriteXD", "testspriteXD.png", "GUI/testspriteXD", glm::vec2(100, 100), glm::radians(0.0f), glm::vec2(400, 400));
@@ -178,6 +178,8 @@ void GameState::Update(float deltaTime)
 	m_entityEngine->Update(deltaTime);
 
 	m_guiHandler->DrawGUI();
+
+	m_guiHandler->RenderText("This is sample text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 
 	SDL_GL_SwapWindow(GetWindow());
 }

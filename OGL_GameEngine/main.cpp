@@ -151,6 +151,10 @@ bool CmainApp::BInit()
 
 	glEnable(GL_DEPTH_TEST);
 
+	//required by font rendering
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	//init input handler
 	SDL_Keycode tempKeys[6] = { SDLK_w, SDLK_a, SDLK_s, SDLK_d, SDLK_p, SDLK_f };
 	m_GEinput = new SDLInputHandler(tempKeys, sizeof(tempKeys) / sizeof(tempKeys[0]));

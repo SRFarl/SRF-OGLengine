@@ -4,6 +4,10 @@
 #include "Headers.h"
 #include "Shader.h"
 #include "Model.h"
+#include <ft2build.h>
+#include FT_FREETYPE_H 
+
+//https://learnopengl.com/#!In-Practice/Text-Rendering
 
 struct Sprite
 {
@@ -15,140 +19,43 @@ struct Sprite
 	bool active;
 };
 
+struct Character {
+	GLuint     textureId;  // ID handle of the glyph texture
+	glm::ivec2 size;       // Size of glyph
+	glm::ivec2 bearing;    // Offset from baseline to left/top of glyph
+	GLuint     advance;    // Offset to advance to next glyph
+};
+
 class GUIHandler 
 {
 public:
-	GUIHandler(std::string vertexPath, std::string fragPath)
-	{
-		//init projection
-		m_guiProj = glm::ortho(0.0f, (float) WINWIDTH, (float) WINHEIGHT, 0.0f, -1.0f, 1.0f);
+	GUIHandler(std::string guiVertexPath, std::string guiFragPath, std::string fontVertexPath, std::string fontFragPath, int _fontSize);
 
-		m_guiShader = new Shader("gui", vertexPath.c_str(), fragPath.c_str());
+	~GUIHandler();
 
-		//create triangles
-		GLfloat vertices[] = {
-			// Pos      // Tex
-			0.0f, 1.0f, 0.0f, 1.0f,
-			1.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f,
+	void DeleteSprite(std::string _name);
 
-			0.0f, 1.0f, 0.0f, 1.0f,
-			1.0f, 1.0f, 1.0f, 1.0f,
-			1.0f, 0.0f, 1.0f, 0.0f
-		};
+	Sprite* GetSprite(std::string _name);
 
-		GLuint VBO;
-		glGenVertexArrays(1, &squareVAO);
-		glGenBuffers(1, &VBO);
+	void LoadSprite(std::string spriteName, std::string spriteFileName, std::string spriteDirectory, glm::vec2 initPos, GLfloat initRotate, glm::vec2 initSize);
 
-		glBindVertexArray(squareVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	void DrawGUI();
 
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+	void RenderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec3 color);
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
-
-	~GUIHandler()
-	{
-		delete m_guiShader;
-		glDeleteVertexArrays(1, &squareVAO);
-		m_spriteList.clear();
-	}
-
-	void DeleteSprite(std::string _name)
-	{
-		for (std::vector<Sprite>::iterator it = m_spriteList.begin(); it != m_spriteList.end();)
-		{
-			if (it->name == _name)
-			{
-				m_spriteList.erase(it);
-				return;
-			}
-
-			it++;
-		}
-	}
-
-	Sprite* GetSprite(std::string _name)
-	{
-		for (std::vector<Sprite>::iterator it = m_spriteList.begin(); it != m_spriteList.end();)
-		{
-			if (it->name == _name)
-			{
-				return &(*it);
-			}
-		}
-
-		return NULL;
-	}
-
-	void LoadSprite(std::string spriteName, std::string spriteFileName, std::string spriteDirectory, glm::vec2 initPos, GLfloat initRotate, glm::vec2 initSize)
-	{
-		Sprite temp;
-		temp.name = spriteName;
-		temp.textureId = TextureFromFile(spriteFileName.c_str(), spriteDirectory);
-		temp.position = initPos;
-		temp.rotate = initRotate;
-		temp.size = initSize;
-		temp.active = true;
-
-		m_spriteList.push_back(temp);
-	}
-
-	void DrawGUI()
-	{
-		glDisable(GL_DEPTH_TEST);
-
-		for (std::vector<Sprite>::iterator it = m_spriteList.begin(); it != m_spriteList.end();)
-		{
-			if (it->active)
-			{
-				m_guiShader->UseShader();
-				glm::mat4 model;
-
-				//translate, rotate, scale due to right to left matrix multiplication
-				//move to position
-				model = glm::translate(model, glm::vec3(it->position, 0.0f));
-
-				//change pivot to center of sprite
-				model = glm::translate(model, glm::vec3(0.5f * it->size.x, 0.5f * it->size.y, 0.0f));
-
-				//rotate
-				model = glm::rotate(model, it->rotate, glm::vec3(0.0f, 0.0f, 1.0f));
-
-				//change pivot back to top left corner
-				model = glm::translate(model, glm::vec3(-0.5f * it->size.x, -0.5f * it->size.y, 0.0f));
-
-				//scale
-				model = glm::scale(model, glm::vec3(it->size, 1.0f));
-
-				glUniformMatrix4fv(glGetUniformLocation(m_guiShader->getShaderProgram(), "model"), 1, GL_FALSE, glm::value_ptr(model));
-				glUniformMatrix4fv(glGetUniformLocation(m_guiShader->getShaderProgram(), "projection"), 1, GL_FALSE, glm::value_ptr(m_guiProj));
-
-				glActiveTexture(GL_TEXTURE0);
-				glUniform1i(glGetUniformLocation(m_guiShader->getShaderProgram(), "image"), 0);
-				glBindTexture(GL_TEXTURE_2D, it->textureId);
-
-				glBindVertexArray(squareVAO);
-				glDrawArrays(GL_TRIANGLES, 0, 6);
-				glBindVertexArray(0);
-
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
-			++it;
-		}
-
-		glEnable(GL_DEPTH_TEST);
-	}
 private:
 	glm::mat4 m_guiProj;		//ortho projection matrix for the camera
 	Shader *m_guiShader;
 	std::vector<Sprite> m_spriteList;
 	GLuint squareVAO;
+
+private:
+	//font
+	glm::mat4 m_fontProj;
+	Shader *m_fontShader;
+	GLuint m_fontVAO;
+	GLuint m_fontVBO;
+	std::map<GLchar, Character> m_characters;
 };
 
 
