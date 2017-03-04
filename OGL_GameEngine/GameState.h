@@ -14,6 +14,7 @@
 #include "PauseState.h"
 #include "FlexClothObject.h"
 #include "FlexRigidObject.h"
+#include "GUIHandler.h"
 
 class GameState : public State
 {
@@ -37,6 +38,7 @@ private:
 	//managers
 	AssetBox *m_assetBox;
 	EntityEngine *m_entityEngine;
+	GUIHandler *m_guiHandler;
 
 private:
 	//GameObjects
@@ -71,6 +73,10 @@ bool GameState::Init()
 	//create managers
 	m_assetBox = new AssetBox();
 	m_entityEngine = new EntityEngine();
+	m_guiHandler = new GUIHandler("Shaders\\gui_shader.vs", "Shaders\\gui_shader.frag");
+
+	//init gui
+	m_guiHandler->LoadSprite("testspriteXD", "testspriteXD.png", "GUI/testspriteXD", glm::vec2(100, 100), glm::radians(0.0f), glm::vec2(400, 400));
 
 	//initalise lights
 	m_mainLight = new PointLight;
@@ -103,23 +109,23 @@ bool GameState::Init()
 	m_assetBox->LoadAsset("woodfloor", "Models/woodfloor/woodfloor.obj", false);
 	m_assetBox->LoadAsset("cloth", "Models/cloth/cloth.obj", false);
 
-	//create some game spheres
-	for (int i = 0; i < 10; i+=2)
-	{
-		m_gameSphereList.push_back(new GameSphere("sphere" + i, m_assetBox->GetAsset("sphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(i, 8, 0), glm::vec3(0, 0, 0), true));
-		m_gOList.push_back(m_gameSphereList[i]);
-		m_gameSphereList.push_back(new GameSphere("sphere" + (i+1), m_assetBox->GetAsset("sphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(i, 2, 0), glm::vec3(0, 0, 0), false));
-		m_gOList.push_back(m_gameSphereList[i+1]);
-	}
-
-	//create some cubes
-	m_spinnningSquare1 = new SpinningSquare("spin_square1", m_assetBox->GetAsset("cube"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(2.2f, 8, -3), glm::vec3(0, 0, 0), true);
-	m_gOList.push_back(m_spinnningSquare1);
-	m_spinnningSquare2 = new SpinningSquare("spin_square2", m_assetBox->GetAsset("cube"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(2, 2, -3), glm::vec3(0, 0, 0), false);
-	m_gOList.push_back(m_spinnningSquare2);
-
-	//create a floor
-	m_woodFloor = new StaticObject("floor", m_assetBox->GetAsset("woodfloor"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, -1, 0), glm::vec3(0, 0, 0));
+	////create some game spheres
+	//for (int i = 0; i < 10; i+=2)
+	//{
+	//	m_gameSphereList.push_back(new GameSphere("sphere" + i, m_assetBox->GetAsset("sphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(i, 8, 0), glm::vec3(0, 0, 0), true));
+	//	m_gOList.push_back(m_gameSphereList[i]);
+	//	m_gameSphereList.push_back(new GameSphere("sphere" + (i+1), m_assetBox->GetAsset("sphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(i, 2, 0), glm::vec3(0, 0, 0), false));
+	//	m_gOList.push_back(m_gameSphereList[i+1]);
+	//}
+	//
+	////create some cubes
+	//m_spinnningSquare1 = new SpinningSquare("spin_square1", m_assetBox->GetAsset("cube"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(2.2f, 8, -3), glm::vec3(0, 0, 0), true);
+	//m_gOList.push_back(m_spinnningSquare1);
+	//m_spinnningSquare2 = new SpinningSquare("spin_square2", m_assetBox->GetAsset("cube"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(2, 2, -3), glm::vec3(0, 0, 0), false);
+	//m_gOList.push_back(m_spinnningSquare2);
+	//
+	////create a floor
+	m_woodFloor = new StaticObject("floor", m_assetBox->GetAsset("woodfloor"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
 	m_gOList.push_back(m_woodFloor);
 
 	//create flex rigid
@@ -147,9 +153,9 @@ void GameState::Update(float deltaTime)
 		GetInput()->getKeyPressed(SDLK_s), GetInput()->getKeyPressed(SDLK_a), GetInput()->getKeyPressed(SDLK_d), GetInput()->getMouseLDown(),
 		GetInput()->getMouseXMotion(), GetInput()->getMouseYMotion());
 
-	//fire a sphere if the user presses f
-	if (GetInput()->getKeyLifted(SDLK_f))
-		FireSphereFromCamera();
+	////fire a sphere if the user presses f
+	//if (GetInput()->getKeyLifted(SDLK_f))
+	//	FireSphereFromCamera();
 
 	//update the game objects
 	for (std::vector<GameObject*>::iterator it = m_gOList.begin(); it != m_gOList.end();)
@@ -158,18 +164,20 @@ void GameState::Update(float deltaTime)
 		it++;
 	}
 
-	//check if the mouse is hovering over any spheres
-	for (std::vector<GameSphere*>::iterator it = m_gameSphereList.begin(); it != m_gameSphereList.end();)
-	{
-		(*it)->UpdateSelected(m_fpsCam->GetPos(), m_fpsCam->CreateMouseRayFromCamera(GetInput()->getMouseXPos(), GetInput()->getMouseYPos()));
-		it++;
-	}
-
-	//removes spheres below a y value
-	RemoveSpheresThatHaveFallen();
+	////check if the mouse is hovering over any spheres
+	//for (std::vector<GameSphere*>::iterator it = m_gameSphereList.begin(); it != m_gameSphereList.end();)
+	//{
+	//	(*it)->UpdateSelected(m_fpsCam->GetPos(), m_fpsCam->CreateMouseRayFromCamera(GetInput()->getMouseXPos(), GetInput()->getMouseYPos()));
+	//	it++;
+	//}
+	//
+	////removes spheres below a y value
+	//RemoveSpheresThatHaveFallen();
 
 	//update the entity engine, this updates all the nodes
 	m_entityEngine->Update(deltaTime);
+
+	m_guiHandler->DrawGUI();
 
 	SDL_GL_SwapWindow(GetWindow());
 }

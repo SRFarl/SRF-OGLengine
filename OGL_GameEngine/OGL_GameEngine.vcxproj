@@ -211,6 +211,7 @@
     <ClInclude Include="GameState.h" />
     <ClInclude Include="GL\glew.h" />
     <ClInclude Include="GL\wglew.h" />
+    <ClInclude Include="GUIHandler.h" />
     <ClInclude Include="Headers.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="ModelMesh.h" />

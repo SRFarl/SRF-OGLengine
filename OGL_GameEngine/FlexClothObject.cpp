@@ -21,14 +21,14 @@ FlexClothObject::FlexClothObject(const std::string meshName, Model* modelAsset, 
 	m_fcComp->m_offset = Vec3(initPos.x, initPos.y, initPos.z);
 
 	m_fcComp->m_params.mGravity[0] = 0.0f;
-	m_fcComp->m_params.mGravity[2] = -9.8f;
-	m_fcComp->m_params.mGravity[1] = 0.0f;
+	m_fcComp->m_params.mGravity[1] = -9.8f;
+	m_fcComp->m_params.mGravity[2] = 0.0f;
 
 	m_fcComp->m_params.mWind[0] = 0.0f;
 	m_fcComp->m_params.mWind[1] = 0.0f;
 	m_fcComp->m_params.mWind[2] = 0.0f;
 
-	m_fcComp->m_params.mNumIterations = 8;
+	m_fcComp->m_params.mNumIterations = 4;
 	m_fcComp->m_params.mFluidRestDistance = 0.0f;
 	m_fcComp->m_params.mSolidRestDistance = 0.05f;
 	m_fcComp->m_params.mAnisotropyScale = 1.0f;
@@ -37,7 +37,7 @@ FlexClothObject::FlexClothObject(const std::string meshName, Model* modelAsset, 
 	m_fcComp->m_params.mSmoothing = 1.0f;
 	m_fcComp->m_params.mSolidPressure = 1.0f;
 
-	m_fcComp->m_params.mRadius = 0.0015f;
+	m_fcComp->m_params.mRadius = 0.1115f;
 	m_fcComp->m_params.mDynamicFriction = 0.25f;
 	m_fcComp->m_params.mStaticFriction = 0.0f;
 	m_fcComp->m_params.mParticleFriction = m_fcComp->m_params.mDynamicFriction*0.1f;
@@ -88,6 +88,7 @@ FlexClothObject::FlexClothObject(const std::string meshName, Model* modelAsset, 
 	m_fbComp = new FlexBaseComponent(m_fcComp->m_positions.size(), 2);
 
 	m_fcComp->m_positions[0].w = 0.0f;
+	m_fcComp->m_positions[930].w = 0.0f;
 
 	//create flex cloth node
 	m_fcNode = new FlexClothNode(m_rComp, m_fbComp, m_fcComp);
@@ -98,9 +99,9 @@ void FlexClothObject::Update(float deltaT)
 {
 	//wind
 	m_fcComp->m_windTime += deltaT;
-	const Vec3 kWindDir = Vec3(3.0f, 15.0f, 0.0f);
+	const Vec3 kWindDir = Vec3(3.0f, 0.0f, 15.0f);
 	const float kNoise = fabsf(Perlin1D(m_fcComp->m_windTime*0.05f, 2, 0.25f));
-	Vec3 wind = 1.0f*kWindDir*Vec3(kNoise, kNoise*0.1f, -kNoise*0.1f);
+	Vec3 wind = 10.0f*kWindDir*Vec3(kNoise*0.1f, kNoise*0.1f, -kNoise * 0.5f);
 
 	m_fcComp->m_params.mWind[0] = wind.x;
 	m_fcComp->m_params.mWind[1] = wind.y;
