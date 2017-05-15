@@ -36,9 +36,10 @@ public:
 class SphereCollisionNode
 {
 public:
-	SphereCollisionNode(std::shared_ptr<SphereCollsionComponent> _sCollision, std::shared_ptr<TransformComponent> _transform) : sCollision(_sCollision), movable(NULL), transform(_transform){};
-	SphereCollisionNode(std::shared_ptr<SphereCollsionComponent> _sCollision, std::shared_ptr<TransformComponent> _transform, std::shared_ptr<MovableComponent> _movable) : sCollision(_sCollision), movable(_movable), transform(_transform){};
+	SphereCollisionNode(std::shared_ptr<SphereCollsionComponent> _sCollision, std::shared_ptr<TransformComponent> _transform, std::shared_ptr<IDComponent> _id) : sCollision(_sCollision), movable(NULL), transform(_transform), id(_id) {};
+	SphereCollisionNode(std::shared_ptr<SphereCollsionComponent> _sCollision, std::shared_ptr<TransformComponent> _transform, std::shared_ptr<IDComponent> _id, std::shared_ptr<MovableComponent> _movable) : sCollision(_sCollision), movable(_movable), id(_id), transform(_transform) {};
 
+	std::shared_ptr<IDComponent> id;
 	std::shared_ptr<SphereCollsionComponent> sCollision;
 	std::shared_ptr<MovableComponent> movable;
 	std::shared_ptr<TransformComponent> transform;
@@ -47,9 +48,10 @@ public:
 class AABBCollisionNode
 {
 public:
-	AABBCollisionNode(std::shared_ptr<AABBCollisionComponent> _aabbCollision, std::shared_ptr<TransformComponent> _transform) : aabbCollision(_aabbCollision), movable(NULL), transform(_transform){};
-	AABBCollisionNode(std::shared_ptr<AABBCollisionComponent> _aabbCollision, std::shared_ptr<TransformComponent> _transform, std::shared_ptr<MovableComponent> _movable) : aabbCollision(_aabbCollision), movable(_movable), transform(_transform){};
+	AABBCollisionNode(std::shared_ptr<AABBCollisionComponent> _aabbCollision, std::shared_ptr<TransformComponent> _transform, std::shared_ptr<IDComponent> _id) : aabbCollision(_aabbCollision), movable(NULL), transform(_transform), id(_id) {};
+	AABBCollisionNode(std::shared_ptr<AABBCollisionComponent> _aabbCollision, std::shared_ptr<TransformComponent> _transform, std::shared_ptr<IDComponent> _id, std::shared_ptr<MovableComponent> _movable) : aabbCollision(_aabbCollision), movable(_movable), transform(_transform), id(_id) {};
 
+	std::shared_ptr<IDComponent> id;
 	std::shared_ptr<AABBCollisionComponent> aabbCollision;
 	std::shared_ptr<MovableComponent> movable;
 	std::shared_ptr<TransformComponent> transform;

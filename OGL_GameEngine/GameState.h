@@ -42,6 +42,7 @@ private:
 	std::shared_ptr<EntityEngine> m_entityEngine;
 	std::shared_ptr<GUIHandler> m_guiHandler;
 	std::shared_ptr<SkyBox> m_skybox;
+	std::shared_ptr<CollisionInfoManager> m_collisionInfoManager;
 
 private:
 	//GameObjects
@@ -77,6 +78,8 @@ bool GameState::Init()
 	m_assetBox = std::make_shared<AssetBox>();
 	m_entityEngine = std::make_shared<EntityEngine>();
 	m_guiHandler = std::make_shared<GUIHandler>("Shaders\\gui_shader.vs", "Shaders\\gui_shader.frag", "Shaders\\font_shader.vs", "Shaders\\font_shader.frag", 48);
+	m_collisionInfoManager = std::make_shared<CollisionInfoManager>();
+	m_entityEngine->AddCollisionInfoManager(m_collisionInfoManager);
 
 	//init gui
 	m_guiHandler->LoadSprite("testspriteXD", "testspriteXD.png", "GUI/testspriteXD", glm::vec2(100, 100), glm::radians(0.0f), glm::vec2(400, 400));

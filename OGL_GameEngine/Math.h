@@ -31,6 +31,12 @@ namespace Math
 	float KinematicAABBStaticAABB(glm::vec3 minA, glm::vec3 maxA, glm::vec3 DirectionA, glm::vec3 minB, glm::vec3 maxB, glm::vec3 &normal);
 
 	float KinematicAABBKinematicAABBCollision(glm::vec3 centerA, glm::vec3 DirectionA, glm::vec3 minA, glm::vec3 maxA, float massA, glm::vec3 centerB, glm::vec3 DirectionB, glm::vec3 minB, glm::vec3 maxB, float massB, glm::vec3 &resultA, glm::vec3 &resultB);
+
+	float SquaredDistanceFromPointToClosestAABBPoint(glm::vec3 &p, glm::vec3 minA, glm::vec3 maxA);
+
+	float PointToClosestAABBPointAxisCheck(float pn, float bmin, float bmax);
+
+	bool SphereAABBIntersection(glm::vec3 sphereCentre, float sphereRadius, glm::vec3 minA, glm::vec3 maxA);
 }
 
 #endif

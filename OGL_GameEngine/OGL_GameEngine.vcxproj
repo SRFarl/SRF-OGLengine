@@ -185,6 +185,7 @@
   <ItemGroup>
     <ClInclude Include="AssetBox.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CollisionInfoManager.h" />
     <ClInclude Include="FlexClothObject.h" />
     <ClInclude Include="FlexRigidObject.h" />
     <ClInclude Include="flexutil.h" />

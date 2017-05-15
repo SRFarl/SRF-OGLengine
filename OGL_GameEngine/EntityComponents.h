@@ -36,9 +36,11 @@ public:
 		m_acceleration(0.0f),
 		m_velocity(0.0f),
 		m_skipThisFrame(false),
-		m_mass(1.0f)
+		m_mass(1.0f),
+		m_frozen(false)
 	{}
 
+	bool m_frozen;
 	float m_mass;
 	bool m_skipThisFrame;
 	glm::vec3 m_acceleration;
@@ -81,12 +83,14 @@ public:
 class SphereCollsionComponent
 {
 public:
-	SphereCollsionComponent(glm::vec3 _centrePoint, float _radius, float _damping) :
+	SphereCollsionComponent(glm::vec3 _centrePoint, float _radius, float _damping, bool _sticky) :
 		m_centrePointOffset(_centrePoint),
 		m_radius(_radius),
-		m_damping(_damping)
+		m_damping(_damping),
+		m_sticky(_sticky)
 	{}
 
+	bool m_sticky;
 	float m_damping;
 	glm::vec3 m_centrePointOffset;
 	float m_radius;
@@ -107,6 +111,15 @@ public:
 	glm::vec3 m_minOffset;
 	glm::vec3 m_maxOffset;
 	glm::vec3 m_midOffset;
+};
+
+class IDComponent
+{
+public:
+	IDComponent(std::string _ID) : ID(_ID)
+	{}
+
+	std::string ID;
 };
 
 class FlexBaseComponent

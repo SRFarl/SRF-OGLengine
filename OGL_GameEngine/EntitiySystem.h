@@ -5,6 +5,7 @@
 #include "Math.h"
 #include "flexutil.h"
 #include "SkyBox.h"
+#include "CollisionInfoManager.h"
 
 //systems only hold references to nodes and logic
 
@@ -381,6 +382,7 @@ class CollisionSystem : public ISystem
 private:
 	std::vector<std::shared_ptr<SphereCollisionNode>> m_scList;
 	std::vector<std::shared_ptr<AABBCollisionNode>> m_aabbList;
+	std::shared_ptr<CollisionInfoManager> m_collisionInfoManager;
 
 public:
 
@@ -422,6 +424,12 @@ public:
 			}
 			++it;
 		}
+	}
+
+	void AddCollisionInfoManager(std::shared_ptr<CollisionInfoManager> in)
+	{
+		//add collision info manager
+		m_collisionInfoManager = in;
 	}
 
 	void Update(float deltaT)
@@ -587,6 +595,35 @@ public:
 					it2++;
 				}
 			}
+			it++;
+		}
+
+		//Sphere and static AABB
+		for (std::vector<std::shared_ptr<SphereCollisionNode>>::iterator it = m_scList.begin(); it != m_scList.end();)
+		{
+			//loop over every sphere
+			if (!(*it)->transform->m_isStatic && (*it)->movable->m_velocity != glm::vec3(0))
+			{
+				//this sphere is not a static sphere therefore leave it to the non-static objects to calculate collision
+				for (std::vector<std::shared_ptr<AABBCollisionNode>>::iterator it2 = m_aabbList.begin(); it2 != m_aabbList.end();)
+				{
+					if (Math::SphereAABBIntersection((*it)->transform->m_position + (*it)->sCollision->m_centrePointOffset, (*it)->sCollision->m_radius, (*it2)->transform->m_position + (*it2)->aabbCollision->m_minOffset, (*it2)->transform->m_position + (*it2)->aabbCollision->m_maxOffset))
+					{
+						//intersects
+						if ((*it)->sCollision->m_sticky)
+						{
+							(*it)->movable->m_velocity = glm::vec3(0.0f);
+							(*it)->movable->m_frozen = true;
+						}
+
+						//add info to the collision manager so it can be handled
+						m_collisionInfoManager->AddInfo((*it)->id->ID, (*it2)->id->ID);
+
+					}
+					it2++;
+				}
+			}
+
 			it++;
 		}
 	}

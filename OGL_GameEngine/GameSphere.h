@@ -27,8 +27,9 @@ public:
 		m_movableNode = std::make_shared<MovableNode>(m_mComp, m_transformComp);
 		gameEE->AddMovableNode(m_movableNode);
 
-		m_scComponent = std::make_shared<SphereCollsionComponent>(glm::vec3(0.0f), 1.0f, 0.80f);
-		m_scNode = std::make_shared<SphereCollisionNode>(m_scComponent, m_transformComp, m_mComp);
+		m_iDComp = std::make_shared<IDComponent>(gameModelName);
+		m_scComponent = std::make_shared<SphereCollsionComponent>(glm::vec3(0.0f), 1.0f, 0.80f, false);
+		m_scNode = std::make_shared<SphereCollisionNode>(m_scComponent, m_transformComp, m_iDComp, m_mComp);
 		gameEE->AddSphereCollisionNode(m_scNode);
 	}
 
@@ -76,6 +77,7 @@ private:
 	std::shared_ptr<SelectedComponent> m_selComp;
 
 	std::shared_ptr<SphereCollsionComponent> m_scComponent;
+	std::shared_ptr<IDComponent> m_iDComp;
 	std::shared_ptr<SphereCollisionNode> m_scNode;
 
 	std::shared_ptr<MovableComponent> m_mComp;

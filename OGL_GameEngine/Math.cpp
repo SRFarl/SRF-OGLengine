@@ -365,3 +365,44 @@ float Math::KinematicAABBKinematicAABBCollision(glm::vec3 centerA, glm::vec3 Dir
 
 	return true;
 }
+
+float Math::SquaredDistanceFromPointToClosestAABBPoint(glm::vec3 & p, glm::vec3 minA, glm::vec3 maxA)
+{
+	float sq = 0.0;
+
+	sq += PointToClosestAABBPointAxisCheck(p.x, minA.x, maxA.x);
+	sq += PointToClosestAABBPointAxisCheck(p.y, minA.y, maxA.y);
+	sq += PointToClosestAABBPointAxisCheck(p.z, minA.z, maxA.z);
+
+	return sq;
+}
+
+float Math::PointToClosestAABBPointAxisCheck(float pn, float bmin, float bmax)
+{
+	float out = 0;
+	float v = pn;
+
+	if (v < bmin)
+	{
+		float val = (bmin - v);
+		out += val * val;
+	}
+
+	if (v > bmax)
+	{
+		float val = (v - bmax);
+		out += val * val;
+	}
+
+	return out;
+}
+
+bool Math::SphereAABBIntersection(glm::vec3 sphereCentre, float sphereRadius, glm::vec3 minA, glm::vec3 maxA)
+{
+	float squaredDistance = SquaredDistanceFromPointToClosestAABBPoint(sphereCentre, minA, maxA);
+
+	// Intersection if the distance from center is larger than the radius
+	// of the sphere.
+
+	return squaredDistance <= (sphereRadius * sphereRadius);
+}

@@ -134,6 +134,11 @@ public:
 		m_collisionSystem->RemoveAABBCollisionNode(in);
 	}
 
+	void AddCollisionInfoManager(std::shared_ptr<CollisionInfoManager> in)
+	{
+		m_collisionSystem->AddCollisionInfoManager(in);
+	}
+
 	//flex rigid
 	void AddFlexRigidNode(std::shared_ptr<FlexRigidNode> in)
 	{

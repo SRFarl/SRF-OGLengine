@@ -31,8 +31,9 @@ public:
 		glm::vec3 aabbmid;
 		modelAsset->BuildAABB(aabbmin, aabbmax, aabbmid);
 
+		m_iDComp = std::make_shared<IDComponent>(gameModelName);
 		m_aabbComp = std::make_shared<AABBCollisionComponent>(aabbmin, aabbmax, aabbmid, 0.7f);
-		m_aabbNode = std::make_shared<AABBCollisionNode>(m_aabbComp, m_transformComp, m_mComp);
+		m_aabbNode = std::make_shared<AABBCollisionNode>(m_aabbComp, m_transformComp, m_iDComp, m_mComp);
 		gameEE->AddAABBCollisionNode(m_aabbNode);
 	}
 
@@ -60,6 +61,7 @@ private:
 private:
 	//game objects hold the components and nodes
 	std::shared_ptr<AABBCollisionComponent> m_aabbComp;
+	std::shared_ptr<IDComponent> m_iDComp;
 	std::shared_ptr<AABBCollisionNode> m_aabbNode;
 
 	std::shared_ptr<MovableComponent> m_mComp;
