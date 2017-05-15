@@ -9,6 +9,7 @@
 #include "AssetBox.h"
 #include "SDLInputHandler.h"
 #include "Shader.h"
+#include "FPSCamera.h"
 
 class PauseState : public State
 {

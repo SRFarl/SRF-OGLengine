@@ -15,6 +15,7 @@
 #include "FlexClothObject.h"
 #include "FlexRigidObject.h"
 #include "GUIHandler.h"
+#include "FPSCamera.h"
 #include "SkyBox.h"
 
 class GameState : public State

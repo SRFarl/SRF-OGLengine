@@ -70,12 +70,12 @@ public:
 		m_renderSystem->RemovePointLight(in);
 	}
 
-	void AddCamera(std::shared_ptr<FPSCamera> in)
+	void AddCamera(std::shared_ptr<Camera> in)
 	{
 		m_renderSystem->AddCamera(in);
 	}
 
-	void RemoveCamera(std::shared_ptr<FPSCamera> in)
+	void RemoveCamera(std::shared_ptr<Camera> in)
 	{
 		m_renderSystem->RemoveCamera(in);
 	}

@@ -1,7 +1,7 @@
 #ifndef _ENTITY_SYSTEM_H_
 #define _ENTITY_SYSTEM_H_
 #include "EntityNodes.h"
-#include "FPSCamera.h"
+#include "Camera.h"
 #include "Math.h"
 #include "flexutil.h"
 #include "SkyBox.h"
@@ -17,7 +17,7 @@ public:
 class RenderSystem : public ISystem
 {
 private:
-	std::vector<std::shared_ptr<FPSCamera>> m_cameraList;		//list of cameras
+	std::vector<std::shared_ptr<Camera>> m_cameraList;		//list of cameras
 	std::vector<std::shared_ptr<RenderNode>> m_rnList;			//list of render nodes
 	std::vector<std::shared_ptr<PointLight>> m_plList;			//list of point lights
 	std::vector<std::shared_ptr<DirectionalLight>> m_dlList;	//list of directional lights
@@ -172,16 +172,16 @@ public:
 
 	}
 
-	void AddCamera(std::shared_ptr<FPSCamera> in)
+	void AddCamera(std::shared_ptr<Camera> in)
 	{
 		//adds a camera to the system
 		m_cameraList.push_back(in);
 	}
 
-	void RemoveCamera(std::shared_ptr<FPSCamera> in)
+	void RemoveCamera(std::shared_ptr<Camera> in)
 	{
 		//removes a camera from the system
-		for (std::vector<std::shared_ptr<FPSCamera>>::iterator it = m_cameraList.begin(); it != m_cameraList.end();)
+		for (std::vector<std::shared_ptr<Camera>>::iterator it = m_cameraList.begin(); it != m_cameraList.end();)
 		{
 			if ((*it) == in)
 			{

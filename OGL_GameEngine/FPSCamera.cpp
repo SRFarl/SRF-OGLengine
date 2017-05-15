@@ -1,19 +1,7 @@
 #include "FPSCamera.h"
 
-FPSCamera::FPSCamera(glm::vec3 initPos, glm::vec3 initRotDir, float sensitivity) : m_cameraSpeed(3.0f), m_sensitivity(sensitivity)
+FPSCamera::FPSCamera(glm::vec3 initPos, glm::vec3 initRotDir, float sensitivity) : Camera(initPos, initRotDir), rotationAngles(initRotDir), m_cameraSpeed(3.0f), m_sensitivity(sensitivity)
 {
-	eye = initPos;	//position of camera
-	centre = glm::vec3(0,0,1);	//viewing direction when added to the eye
-	up = glm::vec3(0,1,0);		//up direction vector
-
-	//initialise variables
-	rotationAngles = initRotDir;
-
-	//init proj mat
-	proj = glm::perspective(45.0f, ((float)WINWIDTH / (float)WINHEIGHT), 0.1f, 100.0f);
-
-	//build view matrix
-	view = glm::lookAt(eye, eye + centre, up);
 }
 
 void FPSCamera::UpdateCamera(float deltaTs, bool forward, bool backward, bool left, bool right, bool leftMouseDown, GLfloat mouseXRel, GLfloat mouseYRel)

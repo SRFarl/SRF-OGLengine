@@ -1,34 +1,23 @@
-#pragma once
 #ifndef _FPSCAMERA_H_
 #define _FPSCAMERA_H_
 
 #include "Headers.h"
+#include "Camera.h"
 
-class FPSCamera
+class FPSCamera : public Camera
 {
-	private:
-		glm::mat4 view;		//viewing matrix for the camera
-		glm::mat4 proj;		//projection matrix for the camera
+private:
+	glm::vec3 rotationAngles;	//XYZ rotations about the init
 
-		glm::vec3 eye;		//LookAt variables
-		glm::vec3 centre;	
-		glm::vec3 up;
+	float m_cameraSpeed;		//speed that the camera moves
+	GLfloat m_sensitivity;		//panning sensitivity
 
-		glm::vec3 rotationAngles;	//XYZ rotations about the init
+public:
+	FPSCamera(glm::vec3 initPos, glm::vec3 initDir, float sensitivity);
 
-		float m_cameraSpeed;		//speed that the camera moves
-		GLfloat m_sensitivity;		//panning sensitivity
+	void UpdateCamera(float deltaTs, bool forward, bool backward, bool left, bool right, bool leftMouseDown, GLfloat mouseXRel, GLfloat mouseYRel);
 
-	public:
-		FPSCamera(glm::vec3 initPos, glm::vec3 initDir, float sensitivity);
-		
-		void UpdateCamera(float deltaTs, bool forward, bool backward, bool left, bool right, bool leftMouseDown, GLfloat mouseXRel, GLfloat mouseYRel);
-		
-		glm::vec3 CreateMouseRayFromCamera(float mouseXPos, float mouseYPos);
-		inline glm::vec3 GetPos() { return eye; }
-		inline glm::mat4* GetView() { return &view; };
-		inline glm::mat4* GetProj() { return &proj; };
-
+	glm::vec3 CreateMouseRayFromCamera(float mouseXPos, float mouseYPos);
 };
 
 #endif
