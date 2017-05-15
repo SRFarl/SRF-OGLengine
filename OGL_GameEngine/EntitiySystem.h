@@ -4,6 +4,7 @@
 #include "FPSCamera.h"
 #include "Math.h"
 #include "flexutil.h"
+#include "SkyBox.h"
 
 //systems only hold references to nodes and logic
 
@@ -16,23 +17,24 @@ public:
 class RenderSystem : public ISystem
 {
 private:
-	std::vector<FPSCamera*> m_cameraList;		//list of cameras
-	std::vector<RenderNode*> m_rnList;			//list of render nodes
-	std::vector<PointLight*> m_plList;			//list of point lights
-	std::vector<DirectionalLight*> m_dlList;	//list of directional lights
+	std::vector<std::shared_ptr<FPSCamera>> m_cameraList;		//list of cameras
+	std::vector<std::shared_ptr<RenderNode>> m_rnList;			//list of render nodes
+	std::vector<std::shared_ptr<PointLight>> m_plList;			//list of point lights
+	std::vector<std::shared_ptr<DirectionalLight>> m_dlList;	//list of directional lights
+	std::shared_ptr<SkyBox> m_skyBox;
 
 public:
 
-	void AddNode(RenderNode* in)
+	void AddNode(std::shared_ptr<RenderNode> in)
 	{
 		//adds a render node to the system
 		m_rnList.push_back(in);
 	}
 
-	void RemoveNode(RenderNode* in)
+	void RemoveNode(std::shared_ptr<RenderNode> in)
 	{
 		//removes a render node from the system
-		for (std::vector<RenderNode*>::iterator it = m_rnList.begin(); it != m_rnList.end();)
+		for (std::vector<std::shared_ptr<RenderNode>>::iterator it = m_rnList.begin(); it != m_rnList.end();)
 		{
 			if ((*it) == in)
 			{
@@ -52,7 +54,7 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Render each render node
-		for (std::vector<RenderNode*>::iterator it = m_rnList.begin(); it != m_rnList.end();)
+		for (std::vector<std::shared_ptr<RenderNode>>::iterator it = m_rnList.begin(); it != m_rnList.end();)
 		{
 			//render every mesh of the model
 			for (std::vector<ModelMesh>::iterator it2 = (*it)->render->m_rcModel->m_meshes.begin(); it2 != (*it)->render->m_rcModel->m_meshes.end();)
@@ -108,18 +110,36 @@ public:
 
 			it++;
 		}
+
+		//render skybox
+		if (m_skyBox != NULL)
+		{
+			// Draw skybox as last
+			glDepthFunc(GL_LEQUAL);  // Change depth function so depth test passes when values are equal to depth buffer's content
+			m_skyBox->m_skyboxShader->UseShader();
+			glUniformMatrix4fv(glGetUniformLocation(m_skyBox->m_skyboxShader->getShaderProgram(), "view"), 1, GL_FALSE, glm::value_ptr(glm::mat4(glm::mat3(*m_cameraList[0]->GetView()))));
+			glUniformMatrix4fv(glGetUniformLocation(m_skyBox->m_skyboxShader->getShaderProgram(), "projection"), 1, GL_FALSE, glm::value_ptr(*m_cameraList[0]->GetProj()));
+			// skybox cube
+			glBindVertexArray(m_skyBox->m_skyboxVAO);
+			glActiveTexture(GL_TEXTURE0);
+			glUniform1i(glGetUniformLocation(m_skyBox->m_skyboxShader->getShaderProgram(), "skybox"), 0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyBox->m_cubemapTexId);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glBindVertexArray(0);
+			glDepthFunc(GL_LESS); // Set depth function back to default 
+		}
 	}
 
-	void AddPointLight(PointLight* in)
+	void AddPointLight(std::shared_ptr<PointLight> in)
 	{
 		//adds a point light to the system
 		m_plList.push_back(in);
 	}
 
-	void RemovePointLight(PointLight* in)
+	void RemovePointLight(std::shared_ptr<PointLight> in)
 	{
 		//removes a point light from the system
-		for (std::vector<PointLight*>::iterator it = m_plList.begin(); it != m_plList.end();)
+		for (std::vector<std::shared_ptr<PointLight>>::iterator it = m_plList.begin(); it != m_plList.end();)
 		{
 			if ((*it) == in)
 			{
@@ -131,16 +151,16 @@ public:
 
 	}
 
-	void AddDirectionalLight(DirectionalLight* in)
+	void AddDirectionalLight(std::shared_ptr<DirectionalLight> in)
 	{
 		//adds a directional light to the system
 		m_dlList.push_back(in);
 	}
 
-	void RemoveDirectionalLight(DirectionalLight* in)
+	void RemoveDirectionalLight(std::shared_ptr<DirectionalLight> in)
 	{
 		//removes a directional light from the system
-		for (std::vector<DirectionalLight*>::iterator it = m_dlList.begin(); it != m_dlList.end();)
+		for (std::vector<std::shared_ptr<DirectionalLight>>::iterator it = m_dlList.begin(); it != m_dlList.end();)
 		{
 			if ((*it) == in)
 			{
@@ -152,16 +172,16 @@ public:
 
 	}
 
-	void AddCamera(FPSCamera* in)
+	void AddCamera(std::shared_ptr<FPSCamera> in)
 	{
 		//adds a camera to the system
 		m_cameraList.push_back(in);
 	}
 
-	void RemoveCamera(FPSCamera* in)
+	void RemoveCamera(std::shared_ptr<FPSCamera> in)
 	{
 		//removes a camera from the system
-		for (std::vector<FPSCamera*>::iterator it = m_cameraList.begin(); it != m_cameraList.end();)
+		for (std::vector<std::shared_ptr<FPSCamera>>::iterator it = m_cameraList.begin(); it != m_cameraList.end();)
 		{
 			if ((*it) == in)
 			{
@@ -170,7 +190,16 @@ public:
 			}
 			++it;
 		}
+	}
 
+	void AddSkyBox(std::shared_ptr<SkyBox> in)
+	{
+		m_skyBox = in;
+	}
+
+	void RemoveSkyBox()
+	{
+		m_skyBox = NULL;
 	}
 
 };
@@ -178,20 +207,20 @@ public:
 class MovableSystem : public ISystem
 {
 private:
-	std::vector<MovableNode*> m_mnList;
+	std::vector<std::shared_ptr<MovableNode>> m_mnList;
 
 public:
 
-	void AddNode(MovableNode* in)
+	void AddNode(std::shared_ptr<MovableNode> in)
 	{
 		//add a node to the system
 		m_mnList.push_back(in);
 	}
 
-	void RemoveNode(MovableNode* in)
+	void RemoveNode(std::shared_ptr<MovableNode> in)
 	{
 		//remove a node from the system
-		for (std::vector<MovableNode*>::iterator it = m_mnList.begin(); it != m_mnList.end();)
+		for (std::vector<std::shared_ptr<MovableNode>>::iterator it = m_mnList.begin(); it != m_mnList.end();)
 		{
 			if ((*it) == in)
 			{
@@ -206,7 +235,7 @@ public:
 	void Update(float deltaT)
 	{
 		//movable system update lop
-		for (std::vector<MovableNode*>::iterator it = m_mnList.begin(); it != m_mnList.end();)
+		for (std::vector<std::shared_ptr<MovableNode>>::iterator it = m_mnList.begin(); it != m_mnList.end();)
 		{
 			//iterate over all the nodes
 			if (!(*it)->movable->m_skipThisFrame)
@@ -236,20 +265,20 @@ public:
 class TransformSystem : public ISystem
 {
 private:
-	std::vector<TransformNode*> m_tnList;
+	std::vector<std::shared_ptr<TransformNode>> m_tnList;
 
 public:
 
-	void AddNode(TransformNode* in)
+	void AddNode(std::shared_ptr<TransformNode> in)
 	{
 		//add a node to the system
 		m_tnList.push_back(in);
 	}
 
-	void RemoveNode(TransformNode* in)
+	void RemoveNode(std::shared_ptr<TransformNode> in)
 	{
 		//remove a node from the system
-		for (std::vector<TransformNode*>::iterator it = m_tnList.begin(); it != m_tnList.end();)
+		for (std::vector<std::shared_ptr<TransformNode>>::iterator it = m_tnList.begin(); it != m_tnList.end();)
 		{
 			if ((*it) == in)
 			{
@@ -264,7 +293,7 @@ public:
 	void Update(float deltaT)
 	{
 		//update loop for the transform system
-		for (std::vector<TransformNode*>::iterator it = m_tnList.begin(); it != m_tnList.end();)
+		for (std::vector<std::shared_ptr<TransformNode>>::iterator it = m_tnList.begin(); it != m_tnList.end();)
 		{
 			if (!(*it)->transform->m_isStatic)
 			{
@@ -307,7 +336,7 @@ public:
 		}
 	}
 
-	void UpdateForOne(TransformNode* _tn)
+	void UpdateForOne(std::shared_ptr<TransformNode> _tn)
 	{
 		//used outside of the update loop
 		//QUATERNIONS
@@ -350,21 +379,21 @@ public:
 class CollisionSystem : public ISystem
 {
 private:
-	std::vector<SphereCollisionNode*> m_scList;
-	std::vector<AABBCollisionNode*> m_aabbList;
+	std::vector<std::shared_ptr<SphereCollisionNode>> m_scList;
+	std::vector<std::shared_ptr<AABBCollisionNode>> m_aabbList;
 
 public:
 
-	void AddSphereCollisionNode(SphereCollisionNode* in)
+	void AddSphereCollisionNode(std::shared_ptr<SphereCollisionNode> in)
 	{
 		//add a sphere collision node to the system
 		m_scList.push_back(in);
 	}
 
-	void RemoveSphereCollisionNode(SphereCollisionNode* in)
+	void RemoveSphereCollisionNode(std::shared_ptr<SphereCollisionNode> in)
 	{
 		//remove a sphere collision node to the system
-		for (std::vector<SphereCollisionNode*>::iterator it = m_scList.begin(); it != m_scList.end();)
+		for (std::vector<std::shared_ptr<SphereCollisionNode>>::iterator it = m_scList.begin(); it != m_scList.end();)
 		{
 			if ((*it) == in)
 			{
@@ -375,16 +404,16 @@ public:
 		}
 	}
 
-	void AddAABBCollisionNode(AABBCollisionNode* in)
+	void AddAABBCollisionNode(std::shared_ptr<AABBCollisionNode> in)
 	{
 		//add a aabb collision node to the system
 		m_aabbList.push_back(in);
 	}
 
-	void RemoveAABBCollisionNode(AABBCollisionNode* in)
+	void RemoveAABBCollisionNode(std::shared_ptr<AABBCollisionNode> in)
 	{
 		//remove a aabb collision node to the system
-		for (std::vector<AABBCollisionNode*>::iterator it = m_aabbList.begin(); it != m_aabbList.end();)
+		for (std::vector<std::shared_ptr<AABBCollisionNode>>::iterator it = m_aabbList.begin(); it != m_aabbList.end();)
 		{
 			if ((*it) == in)
 			{
@@ -399,13 +428,13 @@ public:
 	{
 		//update loop for the collision system
 		//SPHERE
-		for (std::vector<SphereCollisionNode*>::iterator it = m_scList.begin(); it != m_scList.end();)
+		for (std::vector<std::shared_ptr<SphereCollisionNode>>::iterator it = m_scList.begin(); it != m_scList.end();)
 		{
 			//loop over every sphere
 			if (!(*it)->transform->m_isStatic && (*it)->movable->m_velocity != glm::vec3(0))
 			{
 				//this sphere is not a static sphere therefore leave it to the non-static objects to calculate collision
-				for (std::vector<SphereCollisionNode*>::iterator it2 = m_scList.begin(); it2 != m_scList.end();)
+				for (std::vector<std::shared_ptr<SphereCollisionNode>>::iterator it2 = m_scList.begin(); it2 != m_scList.end();)
 				{
 					if (it2 != it)
 					{
@@ -480,13 +509,13 @@ public:
 		}
 
 		//AABB
-		for (std::vector<AABBCollisionNode*>::iterator it = m_aabbList.begin(); it != m_aabbList.end();)
+		for (std::vector<std::shared_ptr<AABBCollisionNode>>::iterator it = m_aabbList.begin(); it != m_aabbList.end();)
 		{
 			//loop over every aabb
 			if (!(*it)->transform->m_isStatic && (*it)->movable->m_velocity != glm::vec3(0))
 			{
 				//this AABB is not a static sphere therefore leave it to the non-static objects to calculate collision
-				for (std::vector<AABBCollisionNode*>::iterator it2 = m_aabbList.begin(); it2 != m_aabbList.end();)
+				for (std::vector<std::shared_ptr<AABBCollisionNode>>::iterator it2 = m_aabbList.begin(); it2 != m_aabbList.end();)
 				{
 					if (it2 != it)
 					{
@@ -566,20 +595,20 @@ public:
 class FlexRigidSystem : public ISystem
 {
 private:
-	std::vector <FlexRigidNode*> m_frList;
+	std::vector <std::shared_ptr<FlexRigidNode>> m_frList;
 
 public:
 
-	void AddNode(FlexRigidNode* in)
+	void AddNode(std::shared_ptr<FlexRigidNode> in)
 	{
 		//add a node to the system
 		m_frList.push_back(in);
 	}
 
-	void RemoveNode(FlexRigidNode* in)
+	void RemoveNode(std::shared_ptr<FlexRigidNode> in)
 	{
 		//remove a node from the system
-		for (std::vector<FlexRigidNode*>::iterator it = m_frList.begin(); it != m_frList.end();)
+		for (std::vector<std::shared_ptr<FlexRigidNode>>::iterator it = m_frList.begin(); it != m_frList.end();)
 		{
 			if ((*it) == in)
 			{
@@ -594,7 +623,7 @@ public:
 	void Update(float deltaT)
 	{
 		//flex rigid system update lop
-		for (std::vector<FlexRigidNode*>::iterator it = m_frList.begin(); it != m_frList.end();)
+		for (std::vector<std::shared_ptr<FlexRigidNode>>::iterator it = m_frList.begin(); it != m_frList.end();)
 		{
 			// always set positions to flush any other updates (i.e. mouse picking)
 			flexSetParticles((*it)->flexBase->m_flex, &(*it)->flexRigid->m_positions[0].x, (*it)->flexRigid->m_positions.size(), eFlexMemoryHost);
@@ -613,13 +642,13 @@ public:
 				flexGetRigidTransforms((*it)->flexBase->m_flex, (float*)&(*it)->flexRigid->m_rigidRotations[0], (float*)&(*it)->flexRigid->m_rigidTranslations[0], eFlexMemoryHost);
 
 			//update the render mesh vertices with the current deformation
-			flexutil::FindSoftBodyOffsets((*it)->flexRigid, (*it)->render);
+			flexutil::FindSoftBodyOffsets((*it)->flexRigid.get(), (*it)->render.get());
 
 			it++;
 		}
 	}
 
-	void Init(FlexRigidNode* in)
+	void Init(std::shared_ptr<FlexRigidNode> in)
 	{
 		flexSetParams(in->flexBase->m_flex, &in->flexRigid->m_params);
 
@@ -663,20 +692,20 @@ public:
 class FlexClothSystem : public ISystem
 {
 private:
-	std::vector <FlexClothNode*> m_fcList;
+	std::vector <std::shared_ptr<FlexClothNode>> m_fcList;
 
 public:
 
-	void AddNode(FlexClothNode* in)
+	void AddNode(std::shared_ptr<FlexClothNode> in)
 	{
 		//add a node to the system
 		m_fcList.push_back(in);
 	}
 
-	void RemoveNode(FlexClothNode* in)
+	void RemoveNode(std::shared_ptr<FlexClothNode> in)
 	{
 		//remove a node from the system
-		for (std::vector<FlexClothNode*>::iterator it = m_fcList.begin(); it != m_fcList.end();)
+		for (std::vector<std::shared_ptr<FlexClothNode>>::iterator it = m_fcList.begin(); it != m_fcList.end();)
 		{
 			if ((*it) == in)
 			{
@@ -691,7 +720,7 @@ public:
 	void Update(float deltaT)
 	{
 		//flex rigid system update lop
-		for (std::vector<FlexClothNode*>::iterator it = m_fcList.begin(); it != m_fcList.end();)
+		for (std::vector<std::shared_ptr<FlexClothNode>>::iterator it = m_fcList.begin(); it != m_fcList.end();)
 		{
 			// always set positions to flush any other updates (i.e. mouse picking)
 			flexSetParticles((*it)->flexBase->m_flex, &(*it)->flexCloth->m_positions[0].x, (*it)->flexCloth->m_positions.size(), eFlexMemoryHost);
@@ -713,7 +742,7 @@ public:
 		}
 	}
 
-	void Init(FlexClothNode* in)
+	void Init(std::shared_ptr<FlexClothNode> in)
 	{
 		flexSetParams(in->flexBase->m_flex, &in->flexCloth->m_params);
 

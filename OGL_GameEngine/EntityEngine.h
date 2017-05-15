@@ -7,32 +7,26 @@
 class EntityEngine
 {
 private:
-	RenderSystem* m_renderSystem;
-	MovableSystem* m_movableSystem;
-	TransformSystem* m_transformSystem;
-	CollisionSystem* m_collisionSystem;
-	FlexRigidSystem* m_flexRigidSystem;
-	FlexClothSystem* m_flexClothSystem;
+	std::shared_ptr<RenderSystem> m_renderSystem;
+	std::shared_ptr<MovableSystem> m_movableSystem;
+	std::shared_ptr<TransformSystem> m_transformSystem;
+	std::shared_ptr<CollisionSystem> m_collisionSystem;
+	std::shared_ptr<FlexRigidSystem> m_flexRigidSystem;
+	std::shared_ptr<FlexClothSystem> m_flexClothSystem;
 
 public:
 	EntityEngine()
 	{
-		m_movableSystem = new MovableSystem();
-		m_transformSystem = new TransformSystem();
-		m_renderSystem = new RenderSystem();
-		m_collisionSystem = new CollisionSystem();
-		m_flexRigidSystem = new FlexRigidSystem();
-		m_flexClothSystem = new FlexClothSystem();
+		m_movableSystem = std::make_shared<MovableSystem>();
+		m_transformSystem = std::make_shared<TransformSystem>();
+		m_renderSystem = std::make_shared<RenderSystem>();
+		m_collisionSystem = std::make_shared<CollisionSystem>();
+		m_flexRigidSystem = std::make_shared<FlexRigidSystem>();
+		m_flexClothSystem = std::make_shared<FlexClothSystem>();
 	}
 
 	~EntityEngine()
 	{
-		delete m_flexClothSystem;
-		delete m_flexRigidSystem;
-		delete m_collisionSystem;
-		delete m_transformSystem;
-		delete m_renderSystem;
-		delete m_movableSystem;
 	}
 
 	void Update(float deltaT)
@@ -46,110 +40,120 @@ public:
 	}
 
 	//render
-	void AddRenderNode(RenderNode* in)
+	void AddRenderNode(std::shared_ptr<RenderNode> in)
 	{
 		m_renderSystem->AddNode(in);
 	}
 
-	void RemoveRenderNode(RenderNode* in)
+	void RemoveRenderNode(std::shared_ptr<RenderNode> in)
 	{
 		m_renderSystem->RemoveNode(in);
 	}
 
-	void AddRenderDirectionalLight(DirectionalLight* in)
+	void AddRenderDirectionalLight(std::shared_ptr<DirectionalLight> in)
 	{
 		m_renderSystem->AddDirectionalLight(in);
 	}
 
-	void RemoveRenderDirectionalLight(DirectionalLight* in)
+	void RemoveRenderDirectionalLight(std::shared_ptr<DirectionalLight> in)
 	{
 		m_renderSystem->RemoveDirectionalLight(in);
 	}
 
-	void AddRenderPointLight(PointLight* in)
+	void AddRenderPointLight(std::shared_ptr<PointLight> in)
 	{
 		m_renderSystem->AddPointLight(in);
 	}
 
-	void RemoveRenderPointLight(PointLight* in)
+	void RemoveRenderPointLight(std::shared_ptr<PointLight> in)
 	{
 		m_renderSystem->RemovePointLight(in);
 	}
 
-	void AddCamera(FPSCamera* in)
+	void AddCamera(std::shared_ptr<FPSCamera> in)
 	{
 		m_renderSystem->AddCamera(in);
 	}
 
-	void RemoveCamera(FPSCamera* in)
+	void RemoveCamera(std::shared_ptr<FPSCamera> in)
 	{
 		m_renderSystem->RemoveCamera(in);
 	}
 
+	void AddSkyBox(std::shared_ptr<SkyBox> in)
+	{
+		m_renderSystem->AddSkyBox(in);
+	}
+
+	void RemoveSkyBox()
+	{
+		m_renderSystem->RemoveSkyBox();
+	}
+
 	//movable
-	void AddMovableNode(MovableNode* in)
+	void AddMovableNode(std::shared_ptr<MovableNode> in)
 	{
 		m_movableSystem->AddNode(in);
 	}
 
-	void RemoveMovableNode(MovableNode* in)
+	void RemoveMovableNode(std::shared_ptr<MovableNode> in)
 	{
 		m_movableSystem->RemoveNode(in);
 	}
 
 	//transform
-	void AddTransformNode(TransformNode* in)
+	void AddTransformNode(std::shared_ptr<TransformNode> in)
 	{
 		m_transformSystem->AddNode(in);
 		m_transformSystem->UpdateForOne(in);
 	}
 
-	void RemoveTransformNode(TransformNode* in)
+	void RemoveTransformNode(std::shared_ptr<TransformNode> in)
 	{
 		m_transformSystem->RemoveNode(in);
 	}
 
 	//collision
-	void AddSphereCollisionNode(SphereCollisionNode* in)
+	void AddSphereCollisionNode(std::shared_ptr<SphereCollisionNode> in)
 	{
 		m_collisionSystem->AddSphereCollisionNode(in);
 	}
 
-	void RemoveSphereCollisionNode(SphereCollisionNode* in)
+	void RemoveSphereCollisionNode(std::shared_ptr<SphereCollisionNode> in)
 	{
 		m_collisionSystem->RemoveSphereCollisionNode(in);
 	}
 
-	void AddAABBCollisionNode(AABBCollisionNode* in)
+	void AddAABBCollisionNode(std::shared_ptr<AABBCollisionNode> in)
 	{
 		m_collisionSystem->AddAABBCollisionNode(in);
 	}
 
-	void RemoveAABBCollisionNode(AABBCollisionNode* in)
+	void RemoveAABBCollisionNode(std::shared_ptr<AABBCollisionNode> in)
 	{
 		m_collisionSystem->RemoveAABBCollisionNode(in);
 	}
 
 	//flex rigid
-	void AddFlexRigidNode(FlexRigidNode* in)
+	void AddFlexRigidNode(std::shared_ptr<FlexRigidNode> in)
 	{
 		m_flexRigidSystem->AddNode(in);
 		m_flexRigidSystem->Init(in);
 	}
 
-	void RemoveFlexRigidNode(FlexRigidNode* in)
+	void RemoveFlexRigidNode(std::shared_ptr<FlexRigidNode> in)
 	{
 		m_flexRigidSystem->RemoveNode(in);
 	}
 
 	//flex cloth
-	void AddFlexClothNode(FlexClothNode* in)
+	void AddFlexClothNode(std::shared_ptr<FlexClothNode> in)
 	{
 		m_flexClothSystem->AddNode(in);
 		m_flexClothSystem->Init(in);
 	}
 
-	void RemoveFlexClothNode(FlexClothNode* in)
+	void RemoveFlexClothNode(std::shared_ptr<FlexClothNode> in)
 	{
 		m_flexClothSystem->RemoveNode(in);
 	}

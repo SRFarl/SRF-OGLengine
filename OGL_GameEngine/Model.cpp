@@ -1,4 +1,5 @@
 #include "Model.h"
+#include <string>
 
 GLint TextureFromFile(const char* path, std::string directory)
 {
@@ -12,7 +13,7 @@ GLint TextureFromFile(const char* path, std::string directory)
 	// Assign texture to ID
 	glBindTexture(GL_TEXTURE_2D, textureID);
 
-	if (filename.substr(filename.length() - 3) == "png")
+	if (filename.substr(filename.length() - 3, 3) == "png")
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	}

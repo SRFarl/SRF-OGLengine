@@ -8,63 +8,63 @@
 class RenderNode
 {
 public:
-	RenderNode(RenderComponent* _render, TransformComponent* _transform) : render(_render), transform(_transform), selected(NULL) {};
-	RenderNode(RenderComponent* _render, TransformComponent* _transform, SelectedComponent* _selected) : render(_render), transform(_transform), selected(_selected) {};
+	RenderNode(std::shared_ptr<RenderComponent> _render, std::shared_ptr<TransformComponent> _transform) : render(_render), transform(_transform), selected(NULL) {};
+	RenderNode(std::shared_ptr<RenderComponent> _render, std::shared_ptr<TransformComponent> _transform, std::shared_ptr<SelectedComponent> _selected) : render(_render), transform(_transform), selected(_selected) {};
 
-	RenderComponent* render;
-	TransformComponent* transform;
-	SelectedComponent* selected;
+	std::shared_ptr<RenderComponent> render;
+	std::shared_ptr<TransformComponent> transform;
+	std::shared_ptr<SelectedComponent> selected;
 };
 
 class MovableNode
 {
 public:
-	MovableNode(MovableComponent* _movable, TransformComponent* _transform) : movable(_movable), transform(_transform) {};
+	MovableNode(std::shared_ptr<MovableComponent> _movable, std::shared_ptr<TransformComponent> _transform) : movable(_movable), transform(_transform) {};
 
-	MovableComponent* movable;
-	TransformComponent* transform;
+	std::shared_ptr<MovableComponent> movable;
+	std::shared_ptr<TransformComponent> transform;
 };
 
 class TransformNode
 {
 public:
-	TransformNode(TransformComponent* _transform) : transform(_transform) {};
+	TransformNode(std::shared_ptr<TransformComponent> _transform) : transform(_transform) {};
 
-	TransformComponent* transform;
+	std::shared_ptr<TransformComponent> transform;
 };
 
 class SphereCollisionNode
 {
 public:
-	SphereCollisionNode(SphereCollsionComponent* _sCollision, TransformComponent* _transform) : sCollision(_sCollision), movable(NULL), transform(_transform){};
-	SphereCollisionNode(SphereCollsionComponent* _sCollision, TransformComponent* _transform, MovableComponent* _movable) : sCollision(_sCollision), movable(_movable), transform(_transform){};
+	SphereCollisionNode(std::shared_ptr<SphereCollsionComponent> _sCollision, std::shared_ptr<TransformComponent> _transform) : sCollision(_sCollision), movable(NULL), transform(_transform){};
+	SphereCollisionNode(std::shared_ptr<SphereCollsionComponent> _sCollision, std::shared_ptr<TransformComponent> _transform, std::shared_ptr<MovableComponent> _movable) : sCollision(_sCollision), movable(_movable), transform(_transform){};
 
-	SphereCollsionComponent* sCollision;
-	MovableComponent* movable;
-	TransformComponent* transform;
+	std::shared_ptr<SphereCollsionComponent> sCollision;
+	std::shared_ptr<MovableComponent> movable;
+	std::shared_ptr<TransformComponent> transform;
 };
 
 class AABBCollisionNode
 {
 public:
-	AABBCollisionNode(AABBCollisionComponent* _aabbCollision, TransformComponent* _transform) : aabbCollision(_aabbCollision), movable(NULL), transform(_transform){};
-	AABBCollisionNode(AABBCollisionComponent* _aabbCollision, TransformComponent* _transform, MovableComponent* _movable) : aabbCollision(_aabbCollision), movable(_movable), transform(_transform){};
+	AABBCollisionNode(std::shared_ptr<AABBCollisionComponent> _aabbCollision, std::shared_ptr<TransformComponent> _transform) : aabbCollision(_aabbCollision), movable(NULL), transform(_transform){};
+	AABBCollisionNode(std::shared_ptr<AABBCollisionComponent> _aabbCollision, std::shared_ptr<TransformComponent> _transform, std::shared_ptr<MovableComponent> _movable) : aabbCollision(_aabbCollision), movable(_movable), transform(_transform){};
 
-	AABBCollisionComponent* aabbCollision;
-	MovableComponent* movable;
-	TransformComponent* transform;
+	std::shared_ptr<AABBCollisionComponent> aabbCollision;
+	std::shared_ptr<MovableComponent> movable;
+	std::shared_ptr<TransformComponent> transform;
 };
 
 class FlexRigidNode
 {
 
 public:
-	FlexRigidNode(FlexBaseComponent* _flexBase, FlexRigidComponent* _flexRigid) : flexBase(_flexBase), flexRigid(_flexRigid) {};
-	FlexRigidNode(RenderComponent* _render, FlexBaseComponent* _flexBase, FlexRigidComponent* _flexRigid) : render(_render), flexBase(_flexBase), flexRigid(_flexRigid) {};
+	FlexRigidNode(std::shared_ptr<FlexBaseComponent> _flexBase, std::shared_ptr<FlexRigidComponent> _flexRigid) : flexBase(_flexBase), flexRigid(_flexRigid) {};
+	FlexRigidNode(std::shared_ptr<RenderComponent> _render, std::shared_ptr<FlexBaseComponent> _flexBase, std::shared_ptr<FlexRigidComponent> _flexRigid) : render(_render), flexBase(_flexBase), flexRigid(_flexRigid) {};
 
-	RenderComponent* render;
-	FlexBaseComponent* flexBase;
-	FlexRigidComponent* flexRigid;
+	std::shared_ptr<RenderComponent> render;
+	std::shared_ptr<FlexBaseComponent> flexBase;
+	std::shared_ptr<FlexRigidComponent> flexRigid;
 
 };
 
@@ -72,12 +72,12 @@ class FlexClothNode
 {
 
 public:
-	FlexClothNode(FlexBaseComponent* _flexBase, FlexClothComponent* _flexCloth) : flexBase(_flexBase), flexCloth(_flexCloth) {};
-	FlexClothNode(RenderComponent* _render, FlexBaseComponent* _flexBase, FlexClothComponent* _flexCloth) : render(_render), flexBase(_flexBase), flexCloth(_flexCloth) {};
+	FlexClothNode(std::shared_ptr<FlexBaseComponent> _flexBase, std::shared_ptr<FlexClothComponent> _flexCloth) : flexBase(_flexBase), flexCloth(_flexCloth) {};
+	FlexClothNode(std::shared_ptr<RenderComponent> _render, std::shared_ptr<FlexBaseComponent> _flexBase, std::shared_ptr<FlexClothComponent> _flexCloth) : render(_render), flexBase(_flexBase), flexCloth(_flexCloth) {};
 
-	RenderComponent* render;
-	FlexBaseComponent* flexBase;
-	FlexClothComponent* flexCloth;
+	std::shared_ptr<RenderComponent> render;
+	std::shared_ptr<FlexBaseComponent> flexBase;
+	std::shared_ptr<FlexClothComponent> flexCloth;
 };
 
 #endif

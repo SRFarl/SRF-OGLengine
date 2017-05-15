@@ -15,6 +15,7 @@
 #include "FlexClothObject.h"
 #include "FlexRigidObject.h"
 #include "GUIHandler.h"
+#include "SkyBox.h"
 
 class GameState : public State
 {
@@ -32,29 +33,30 @@ private:
 
 private: 
 	//GL
-	Shader *m_sceneShader;
+	std::shared_ptr<Shader> m_sceneShader;
 
 private:
 	//managers
-	AssetBox *m_assetBox;
-	EntityEngine *m_entityEngine;
-	GUIHandler *m_guiHandler;
+	std::shared_ptr<AssetBox> m_assetBox;
+	std::shared_ptr<EntityEngine> m_entityEngine;
+	std::shared_ptr<GUIHandler> m_guiHandler;
+	std::shared_ptr<SkyBox> m_skybox;
 
 private:
 	//GameObjects
-	FPSCamera* m_fpsCam;
-	PointLight* m_mainLight;
-	DirectionalLight* m_mainDLight;
+	std::shared_ptr<FPSCamera> m_fpsCam;
+	std::shared_ptr<PointLight> m_mainLight;
+	std::shared_ptr<DirectionalLight> m_mainDLight;
 
-	std::vector<GameObject*> m_gOList;
-	StaticObject* m_woodFloor;
-	std::vector<GameSphere*> m_gameSphereList;
+	std::vector<std::shared_ptr<GameObject>> m_gOList;
+	std::shared_ptr<StaticObject> m_woodFloor;
+	std::vector<std::shared_ptr<GameSphere>> m_gameSphereList;
 
-	SpinningSquare* m_spinnningSquare1;
-	SpinningSquare* m_spinnningSquare2;
+	std::shared_ptr<SpinningSquare> m_spinnningSquare1;
+	std::shared_ptr<SpinningSquare> m_spinnningSquare2;
 
-	FlexRigidObject* m_flexrigidobject;
-	FlexClothObject* m_flexclothobject;
+	std::shared_ptr<FlexRigidObject> m_flexrigidobject;
+	std::shared_ptr<FlexClothObject> m_flexclothobject;
 };
 
 GameState::GameState(StateManager* _stateManager, SDL_Window* _window, SDLInputHandler* _GEinput) : State(_stateManager, _window, _GEinput)
@@ -71,15 +73,15 @@ bool GameState::Init()
 	}
 
 	//create managers
-	m_assetBox = new AssetBox();
-	m_entityEngine = new EntityEngine();
-	m_guiHandler = new GUIHandler("Shaders\\gui_shader.vs", "Shaders\\gui_shader.frag", "Shaders\\font_shader.vs", "Shaders\\font_shader.frag", 48);
+	m_assetBox = std::make_shared<AssetBox>();
+	m_entityEngine = std::make_shared<EntityEngine>();
+	m_guiHandler = std::make_shared<GUIHandler>("Shaders\\gui_shader.vs", "Shaders\\gui_shader.frag", "Shaders\\font_shader.vs", "Shaders\\font_shader.frag", 48);
 
 	//init gui
 	m_guiHandler->LoadSprite("testspriteXD", "testspriteXD.png", "GUI/testspriteXD", glm::vec2(100, 100), glm::radians(0.0f), glm::vec2(400, 400));
 
 	//initalise lights
-	m_mainLight = new PointLight;
+	m_mainLight = std::make_shared<PointLight>();
 	m_mainLight->position = glm::vec3(0.0f, 0.5f, 0.0f);
 	m_mainLight->diffuse = glm::vec3(0.8f, 0.8f, 0.8f);
 	m_mainLight->specular = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -90,7 +92,7 @@ bool GameState::Init()
 	//pass light to the entity engine
 	m_entityEngine->AddRenderPointLight(m_mainLight);
 
-	m_mainDLight = new DirectionalLight;
+	m_mainDLight = std::make_shared<DirectionalLight>();
 	m_mainDLight->direction = glm::vec3(-1.0f, -5.0f, 1.0f);
 	m_mainDLight->diffuse = glm::vec3(0.2f, 0.2f, 0.2f);
 	m_mainDLight->specular = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -99,15 +101,25 @@ bool GameState::Init()
 	m_entityEngine->AddRenderDirectionalLight(m_mainDLight);
 
 	//initalise camera
-	m_fpsCam = new FPSCamera(glm::vec3(11, 2, -2), glm::vec3(170, 0, 0),8.0f);
+	m_fpsCam = std::make_shared<FPSCamera>(glm::vec3(11, 2, -2), glm::vec3(170, 0, 0),8.0f);
 	m_entityEngine->AddCamera(m_fpsCam);
 
+	//load skybox
+	//m_skybox = new SkyBox("Models/skybox/greenhaze_rt.jpg", "Models/skybox/greenhaze_lf.jpg", "Models/skybox/greenhaze_up.jpg",
+	//	"Models/skybox/greenhaze_dn.jpg", "Models/skybox/greenhaze_bk.jpg", "Models/skybox/greenhaze_ft.jpg",
+	//	"Shaders\\skybox_shader.vs", "Shaders\\skybox_shader.frag");
+	m_skybox = std::make_shared<SkyBox>("Models/skybox2/lakes_rt.jpg", "Models/skybox2/lakes_lf.jpg", "Models/skybox2/lakes_up.jpg",
+		"Models/skybox2/lakes_dn.jpg", "Models/skybox2/lakes_bk.jpg", "Models/skybox2/lakes_ft.jpg",
+		"Shaders\\skybox_shader.vs", "Shaders\\skybox_shader.frag");
+
+	m_entityEngine->AddSkyBox(m_skybox);
+
 	//load assets
-	m_assetBox->LoadAsset("cube", "Models/brickbox/brickbox.obj", false);
+	//m_assetBox->LoadAsset("cube", "Models/brickbox/brickbox.obj", false);
 	m_assetBox->LoadAsset("sphere", "Models/Sphere/Sphere.obj", false);
 	m_assetBox->LoadAsset("flexsphere", "Models/Sphere/Sphere.obj", false);
 	m_assetBox->LoadAsset("woodfloor", "Models/woodfloor/woodfloor.obj", false);
-	m_assetBox->LoadAsset("cloth", "Models/cloth/cloth.obj", false);
+	m_assetBox->LoadAsset("cloth", "Models/cloth/cloth.obj", true);
 
 	////create some game spheres
 	//for (int i = 0; i < 10; i+=2)
@@ -125,15 +137,15 @@ bool GameState::Init()
 	//m_gOList.push_back(m_spinnningSquare2);
 	//
 	////create a floor
-	m_woodFloor = new StaticObject("floor", m_assetBox->GetAsset("woodfloor"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+	m_woodFloor = std::make_shared<StaticObject>("floor", m_assetBox->GetAsset("woodfloor"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
 	m_gOList.push_back(m_woodFloor);
 
 	//create flex rigid
-	m_flexrigidobject = new FlexRigidObject("flexsphere", m_assetBox->GetAsset("flexsphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(3, 3, 2), glm::vec3(0, 0, 0));
-	m_gOList.push_back(m_flexrigidobject);
+	//m_flexrigidobject = std::make_shared<FlexRigidObject>("flexsphere", m_assetBox->GetAsset("flexsphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(3, 3, 2), glm::vec3(0, 0, 0));
+	//m_gOList.push_back(m_flexrigidobject);
 
 	//create flex cloth
-	m_flexclothobject = new FlexClothObject("cloth", m_assetBox->GetAsset("cloth"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(3, 3, 2), glm::vec3(0, 0, 0));
+	m_flexclothobject = std::make_shared<FlexClothObject>("cloth", m_assetBox->GetAsset("cloth"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, glm::vec3(3, 3, 2), glm::vec3(0, 0, 0));
 	m_gOList.push_back(m_flexclothobject);
 
 	return true;
@@ -158,7 +170,7 @@ void GameState::Update(float deltaTime)
 	//	FireSphereFromCamera();
 
 	//update the game objects
-	for (std::vector<GameObject*>::iterator it = m_gOList.begin(); it != m_gOList.end();)
+	for (std::vector<std::shared_ptr<GameObject>>::iterator it = m_gOList.begin(); it != m_gOList.end();)
 	{
 		(*it)->Update(deltaTime);
 		it++;
@@ -186,34 +198,12 @@ void GameState::Update(float deltaTime)
 
 void GameState::Shutdown()
 {
-	//clean game
-	delete m_mainLight;
-	delete m_mainDLight;
-	delete m_woodFloor;
-	delete m_fpsCam;
-
-	for (int i = 0; i < m_gameSphereList.size();)
-	{
-		GameSphere *temp = m_gameSphereList[i];
-		m_gameSphereList.erase(m_gameSphereList.begin() + i);
-		delete temp; //delete
-	}
-
-	delete m_spinnningSquare1;
-	delete m_spinnningSquare2;
-	delete m_flexrigidobject;
-	delete m_flexclothobject;
-
-	//clean app classes
-	delete m_sceneShader;
-	delete m_entityEngine;
-	delete m_assetBox;
 }
 
 bool GameState::BInitShaders()
 {
 	//create the shader and check that it's working
-	m_sceneShader = new Shader("scene", "Shaders\\scene_shader.vs", "Shaders\\scene_shader.frag");
+	m_sceneShader = std::make_shared<Shader>("scene", "Shaders\\scene_shader.vs", "Shaders\\scene_shader.frag");
 	if (m_sceneShader->getIsShaderOkay() != true)
 	{
 		return false;
@@ -225,7 +215,7 @@ bool GameState::BInitShaders()
 void GameState::FireSphereFromCamera()
 {
 	//create sphere
-	m_gameSphereList.push_back(new GameSphere("sphereFromCam", m_assetBox->GetAsset("sphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, m_fpsCam->GetPos(), glm::vec3(0, 0, 0), true));
+	m_gameSphereList.push_back(std::make_shared<GameSphere>("sphereFromCam", m_assetBox->GetAsset("sphere"), m_sceneShader->getShaderProgram(), m_fpsCam->GetView(), m_fpsCam->GetProj(), m_entityEngine, m_fpsCam->GetPos(), glm::vec3(0, 0, 0), true));
 	//give to GameObjectList
 	m_gOList.push_back(m_gameSphereList.back());
 	//give it an impulse
@@ -235,12 +225,12 @@ void GameState::FireSphereFromCamera()
 void GameState::RemoveSpheresThatHaveFallen()
 {
 	//loop over every sphere checking that it's above a certain point.
-	for (std::vector<GameSphere*>::iterator it = m_gameSphereList.begin(); it != m_gameSphereList.end();)
+	for (std::vector<std::shared_ptr<GameSphere>>::iterator it = m_gameSphereList.begin(); it != m_gameSphereList.end();)
 	{
 		if ((*it)->IsBelowYPosition(-20.0f))
 		{
 			//delete the sphere
-			for (std::vector<GameObject*>::iterator it2 = m_gOList.begin(); it2 != m_gOList.end();)
+			for (std::vector<std::shared_ptr<GameObject>>::iterator it2 = m_gOList.begin(); it2 != m_gOList.end();)
 			{
 				if (*it2 == *it)
 				{
@@ -250,7 +240,6 @@ void GameState::RemoveSpheresThatHaveFallen()
 				it2++;
 			}
 
-			delete *it;
 			it = m_gameSphereList.erase(it);
 		}
 		else

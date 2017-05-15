@@ -18,6 +18,7 @@
 #include <assimp/Importer.hpp>	//assimp is a model loader
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <memory>
 
 
 #include "flex/core/types.h"

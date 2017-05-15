@@ -28,14 +28,14 @@ private:
 
 private:
 	//managers
-	AssetBox *m_assetBox;
-	EntityEngine *m_entityEngine;
+	std::shared_ptr<AssetBox> m_assetBox;
+	std::shared_ptr<EntityEngine> m_entityEngine;
 
 private:
 	//GameObjects
-	FPSCamera* m_fpsCam;
-	PointLight* m_mainLight;
-	DirectionalLight* m_mainDLight;
+	std::shared_ptr<FPSCamera> m_fpsCam;
+	std::shared_ptr<PointLight> m_mainLight;
+	std::shared_ptr<DirectionalLight> m_mainDLight;
 
 	std::vector<GameObject*> m_gOList;
 	StaticObject* m_pauseBox;
@@ -55,11 +55,11 @@ bool PauseState::Init()
 	}
 
 	//create managers
-	m_assetBox = new AssetBox();
-	m_entityEngine = new EntityEngine();
+	m_assetBox = std::make_shared<AssetBox>();
+	m_entityEngine = std::make_shared<EntityEngine>();
 
 	//initalise lights
-	m_mainLight = new PointLight;
+	m_mainLight = std::make_shared<PointLight>();
 	m_mainLight->position = glm::vec3(0.0f, 0.5f, 0.0f);
 	m_mainLight->diffuse = glm::vec3(0.0f, 0.0f, 0.0f);
 	m_mainLight->specular = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -70,7 +70,7 @@ bool PauseState::Init()
 	//pass light to the entity engine
 	m_entityEngine->AddRenderPointLight(m_mainLight);
 
-	m_mainDLight = new DirectionalLight;
+	m_mainDLight = std::make_shared<DirectionalLight>();
 	m_mainDLight->direction = glm::vec3(0.0f, 0.0f, -1.0f);
 	m_mainDLight->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
 	m_mainDLight->specular = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -79,7 +79,7 @@ bool PauseState::Init()
 	m_entityEngine->AddRenderDirectionalLight(m_mainDLight);
 
 	//initalise camera
-	m_fpsCam = new FPSCamera(glm::vec3(0,0,9), glm::vec3(-90,0,-90), 16.0f);
+	m_fpsCam = std::make_shared<FPSCamera>(glm::vec3(0,0,9), glm::vec3(-90,0,-90), 16.0f);
 	m_entityEngine->AddCamera(m_fpsCam);
 
 	//load assets
@@ -120,15 +120,10 @@ void PauseState::Update(float deltaTime)
 void PauseState::Shutdown()
 {
 	//clean game
-	delete m_mainLight;
-	delete m_mainDLight;
 	delete m_pauseBox;
-	delete m_fpsCam;
 
 	//clean app classes
 	delete m_sceneShader;
-	delete m_entityEngine;
-	delete m_assetBox;
 }
 
 bool PauseState::BInitShaders()

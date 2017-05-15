@@ -7,8 +7,8 @@ GUIHandler::GUIHandler(std::string guiVertexPath, std::string guiFragPath, std::
 	m_fontProj = glm::ortho(0.0f, (float)WINWIDTH, 0.0f, (float)WINHEIGHT, -1.0f, 1.0f);
 
 	//shaders
-	m_guiShader = new Shader("gui", guiVertexPath.c_str(), guiFragPath.c_str());
-	m_fontShader = new Shader("gui", fontVertexPath.c_str(), fontFragPath.c_str());
+	m_guiShader = std::make_shared<Shader>("gui", guiVertexPath.c_str(), guiFragPath.c_str());
+	m_fontShader = std::make_shared<Shader>("font", fontVertexPath.c_str(), fontFragPath.c_str());
 
 	//create gui square to render textures on
 	GLfloat vertices[] = {
@@ -23,10 +23,10 @@ GUIHandler::GUIHandler(std::string guiVertexPath, std::string guiFragPath, std::
 	};
 
 	GLuint VBO;
-	glGenVertexArrays(1, &squareVAO);
+	glGenVertexArrays(1, &m_squareVAO);
 	glGenBuffers(1, &VBO);
 
-	glBindVertexArray(squareVAO);
+	glBindVertexArray(m_squareVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
@@ -103,9 +103,8 @@ GUIHandler::GUIHandler(std::string guiVertexPath, std::string guiFragPath, std::
 
 GUIHandler::~GUIHandler()
 {
-	delete m_guiShader;
-	delete m_fontShader;
-	glDeleteVertexArrays(1, &squareVAO);
+	glDeleteVertexArrays(1, &m_squareVAO);
+	glDeleteVertexArrays(1, &m_fontVAO);
 	m_spriteList.clear();
 }
 
@@ -183,7 +182,7 @@ void GUIHandler::DrawGUI()
 			glUniform1i(glGetUniformLocation(m_guiShader->getShaderProgram(), "image"), 0);
 			glBindTexture(GL_TEXTURE_2D, it->textureId);
 
-			glBindVertexArray(squareVAO);
+			glBindVertexArray(m_squareVAO);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			glBindVertexArray(0);
 

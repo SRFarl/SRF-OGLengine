@@ -45,14 +45,14 @@ public:
 
 private:
 	glm::mat4 m_guiProj;		//ortho projection matrix for the camera
-	Shader *m_guiShader;
+	std::shared_ptr<Shader> m_guiShader;
 	std::vector<Sprite> m_spriteList;
-	GLuint squareVAO;
+	GLuint m_squareVAO;
 
 private:
 	//font
 	glm::mat4 m_fontProj;
-	Shader *m_fontShader;
+	std::shared_ptr<Shader> m_fontShader;
 	GLuint m_fontVAO;
 	GLuint m_fontVBO;
 	std::map<GLchar, Character> m_characters;

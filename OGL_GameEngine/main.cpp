@@ -45,6 +45,7 @@ CmainApp::CmainApp(int argc, char *argv[])
 	, m_Window(NULL)
 	, m_Glcontext(NULL)
 	, m_fCameraSens(16.0f)
+	, m_cudaDevice(-1)
 {
 	//go over the program arguments and assign anything
 	for (int i = 1; i < argc; i++)

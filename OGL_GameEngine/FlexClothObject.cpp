@@ -1,24 +1,24 @@
 #include "FlexClothObject.h"
 
-FlexClothObject::FlexClothObject(const std::string meshName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(meshName), m_gameEE(gameEE)
+FlexClothObject::FlexClothObject(const std::string meshName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, std::shared_ptr<EntityEngine> gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(meshName), m_gameEE(gameEE)
 {
 	//entity
 	//transform
-	m_transformComp = new TransformComponent(initPos, initRot, false);
-	m_transformNode = new TransformNode(m_transformComp);
+	m_transformComp = std::make_shared<TransformComponent>(initPos, initRot, false);
+	m_transformNode = std::make_shared<TransformNode>(m_transformComp);
 	gameEE->AddTransformNode(m_transformNode);
 
 	//render
-	m_rComp = new RenderComponent(_program, viewMat, projMat);
+	m_rComp = std::make_shared<RenderComponent>(_program, viewMat, projMat);
 	m_rComp->m_rcModel = modelAsset;
-	m_renderNode = new RenderNode(m_rComp, m_transformComp);
+	m_renderNode = std::make_shared<RenderNode>(m_rComp, m_transformComp);
 	gameEE->AddRenderNode(m_renderNode);
 
 	//flex
-	m_fcComp = new FlexClothComponent();
+	m_fcComp = std::make_shared<FlexClothComponent>();
 
 	m_fcComp->m_windTime = 0.0f;
-	m_fcComp->m_offset = Vec3(initPos.x, initPos.y, initPos.z);
+	m_fcComp->m_offset = Vec3(0, 0, 0);
 
 	m_fcComp->m_params.mGravity[0] = 0.0f;
 	m_fcComp->m_params.mGravity[1] = -9.8f;
@@ -30,7 +30,7 @@ FlexClothObject::FlexClothObject(const std::string meshName, Model* modelAsset, 
 
 	m_fcComp->m_params.mNumIterations = 4;
 	m_fcComp->m_params.mFluidRestDistance = 0.0f;
-	m_fcComp->m_params.mSolidRestDistance = 0.05f;
+	m_fcComp->m_params.mSolidRestDistance = 0.1115f;
 	m_fcComp->m_params.mAnisotropyScale = 1.0f;
 	m_fcComp->m_params.mAnisotropyMin = 0.1f;
 	m_fcComp->m_params.mAnisotropyMax = 2.0f;
@@ -62,6 +62,7 @@ FlexClothObject::FlexClothObject(const std::string meshName, Model* modelAsset, 
 
 	m_fcComp->m_params.mDrag = 0.05f;
 	m_fcComp->m_params.mCollisionDistance = m_fcComp->m_params.mRadius;
+	m_fcComp->m_params.mParticleCollisionMargin = 0.0f;
 	m_fcComp->m_params.mShapeCollisionMargin = m_fcComp->m_params.mRadius*0.1f;
 	m_fcComp->m_params.mRelaxationFactor = 1.3f;
 	m_fcComp->m_params.mDiffuseThreshold = 100.f;
@@ -75,6 +76,10 @@ FlexClothObject::FlexClothObject(const std::string meshName, Model* modelAsset, 
 
 	m_fcComp->m_params.mFluid = false;
 	m_fcComp->m_params.mRelaxationMode = eFlexRelaxationLocal;
+	m_fcComp->m_params.mRelaxationFactor = 1.0f;
+
+	(Vec4&)m_fcComp->m_params.mPlanes[0] = Vec4(0.0f, -1.0f, 0.0f, 5.0f);
+	m_fcComp->m_params.mNumPlanes = 1;
 
 	m_fcComp->m_stretchStiffness = 1.0f;
 	m_fcComp->m_bendStiffness = 0.8f;
@@ -82,16 +87,16 @@ FlexClothObject::FlexClothObject(const std::string meshName, Model* modelAsset, 
 
 	m_fcComp->m_phase = flexMakePhase(0, eFlexPhaseSelfCollide);
 
-	flexutil::CreateSpringGrid(m_fcComp, &m_rComp->m_rcModel->m_meshes[0].m_vertices, &m_rComp->m_rcModel->m_meshes[0].m_indices, Vec3(0.0f, 0.0f, 0.0f));
+	flexutil::CreateSpringGrid(m_fcComp.get(), &m_rComp->m_rcModel->m_meshes[0].m_vertices, &m_rComp->m_rcModel->m_meshes[0].m_indices, Vec3(0.0f, 0.0f, 0.0f));
 
 	//create base component
-	m_fbComp = new FlexBaseComponent(m_fcComp->m_positions.size(), 2);
+	m_fbComp = std::make_shared<FlexBaseComponent>(m_fcComp->m_positions.size(), 2);
 
 	m_fcComp->m_positions[0].w = 0.0f;
 	m_fcComp->m_positions[930].w = 0.0f;
 
 	//create flex cloth node
-	m_fcNode = new FlexClothNode(m_rComp, m_fbComp, m_fcComp);
+	m_fcNode = std::make_shared<FlexClothNode>(m_rComp, m_fbComp, m_fcComp);
 	gameEE->AddFlexClothNode(m_fcNode);
 }
 

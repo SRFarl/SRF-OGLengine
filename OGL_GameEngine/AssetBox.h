@@ -51,7 +51,6 @@ public:
 
 private:
 	std::vector<Model> m_assetList;
-
 };
 
 #endif

@@ -1,21 +1,21 @@
 #include "FlexRigidObject.h"
 
-FlexRigidObject::FlexRigidObject(const std::string meshName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, EntityEngine* gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(meshName)
+FlexRigidObject::FlexRigidObject(const std::string meshName, Model* modelAsset, GLuint _program, glm::mat4* viewMat, glm::mat4* projMat, std::shared_ptr<EntityEngine> gameEE, glm::vec3 initPos, glm::vec3 initRot) : GameObject(meshName)
 {
 	//entity
 	//transform
-	m_transformComp = new TransformComponent(initPos, initRot, false);
-	m_transformNode = new TransformNode(m_transformComp);
+	m_transformComp = std::make_shared<TransformComponent>(initPos, initRot, false);
+	m_transformNode = std::make_shared<TransformNode>(m_transformComp);
 	gameEE->AddTransformNode(m_transformNode);
 
 	//render
-	m_rComp = new RenderComponent(_program, viewMat, projMat);
+	m_rComp = std::make_shared<RenderComponent>(_program, viewMat, projMat);
 	m_rComp->m_rcModel = modelAsset;
-	m_renderNode = new RenderNode(m_rComp, m_transformComp);
+	m_renderNode = std::make_shared<RenderNode>(m_rComp, m_transformComp);
 	gameEE->AddRenderNode(m_renderNode);
 
 	//flex
-	m_frComp = new FlexRigidComponent();
+	m_frComp = std::make_shared<FlexRigidComponent>();
 
 	//init flex variables and params
 	m_frComp->m_scale = Vec3(5.0f, 5.0f, 5.0f);
@@ -32,13 +32,13 @@ FlexRigidObject::FlexRigidObject(const std::string meshName, Model* modelAsset, 
 	m_frComp->m_rigidOffsets.push_back(0);
 	m_frComp->m_radius = 0.40f;
 
-	flexutil::CreateSoftBody(modelAsset, m_frComp);
+	flexutil::CreateSoftBody(modelAsset, m_frComp.get());
 
 	m_frComp->m_radius *= 1.5f;
 	m_frComp->m_normals.resize(m_frComp->m_positions.size());
 
 	//create base component
-	m_fbComp = new FlexBaseComponent(m_frComp->m_positions.size(), 2);
+	m_fbComp = std::make_shared<FlexBaseComponent>(m_frComp->m_positions.size(), 2);
 
 	//set some flex params
 	m_frComp->m_params.mGravity[0] = 0.0f;
@@ -101,7 +101,7 @@ FlexRigidObject::FlexRigidObject(const std::string meshName, Model* modelAsset, 
 	m_frComp->m_params.mRelaxationMode = eFlexRelaxationLocal;
 
 	//create flex rigid node
-	m_frNode = new FlexRigidNode(m_rComp, m_fbComp, m_frComp);
+	m_frNode = std::make_shared<FlexRigidNode>(m_rComp, m_fbComp, m_frComp);
 	gameEE->AddFlexRigidNode(m_frNode);
 }
 
